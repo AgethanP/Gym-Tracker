@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gym Tracker – Startseite</title>
+
+    <!-- Gemeinsames Design unserer App -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Speicherfunktionen -->
+    <script src="storage.js" defer></script>
+
+    <!-- Funktionen unserer Startseite -->
+    <script src="home.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- Kopfbereich -->
+    <header>
+        <h1>Gym Tracker</h1>
+        <p>Bereit für dein nächstes Training?</p>
+    </header>
+
+    <main>
+
+        <!-- Freies Training starten -->
+        <section>
+            <h2>Training starten</h2>
+
+            <!-- Link führt zur Trainingsseite -->
+            <a href="training.html">
+                Freies Training starten →
+            </a>
+        </section>
+
+        <!-- Platz für zukünftige Trainingspläne -->
+        <section>
+            <h2>Meine Trainingspläne</h2>
+                        
+            <!-- Hier zeigt JavaScript die gespeicherten Pläne an -->
+            <div id="saved-plans"></div>
+
+            <!-- Öffnet die Seite zur Erstellung eines Trainingsplans -->
+            <a href="plan-create.html">
+                + Neuen Trainingsplan erstellen
+            </a>
+
+
+            <p>
+                Hier erscheinen später deine selbst
+                erstellten Trainingspläne.
+            </p>
+        </section>
+
+        
+        <!-- Navigation zwischen den Seiten -->
+        <nav>
+            <a href="index.html">Startseite</a>
+            <a href="training.html">Training</a>
+            <a href="history.html">Trainingshistorie</a>
+            <!-- Öffnet die Seite zur Datensicherung -->
+            <a href="backup.html">Datensicherung</a>
+            <!-- Öffnet die Auswertung deiner Trainingsdaten -->
+            <a href="statistics.html">Statistiken</a>
+
+        </nav>
+
+
+    </main>
+
+</body>
+</html>

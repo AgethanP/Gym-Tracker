@@ -1,0 +1,372 @@
+
+/* ==========================================
+   ALLGEMEINES DESIGN
+   ========================================== */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+    margin: 30px;
+}
+
+/* Hauptbereich der Anwendung */
+main {
+    max-width: 650px;
+}
+
+
+/* ==========================================
+   ÜBUNGEN UND SÄTZE
+   ========================================== */
+
+/* Rahmen für einzelne Übungen */
+.exercise {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Abstand zwischen den Sätzen */
+.set {
+    margin-bottom: 15px;
+}
+
+
+/* ==========================================
+   EINGABEFELDER UND BUTTONS
+   ========================================== */
+
+input {
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Button verändert sich beim Darüberfahren */
+button:hover {
+    background-color: #444;
+}
+
+
+/* ==========================================
+   TRAININGSHISTORIE
+   ========================================== */
+
+/* Einzelne gespeicherte Trainingseinheit */
+.history-workout {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Anklickbare Überschrift des Trainings */
+.history-workout summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 5px;
+}
+
+/* Abstand der angezeigten Sätze */
+.history-workout p {
+    margin: 8px 0;
+}
+
+/* Übungsüberschriften */
+.history-workout h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Navigation am Seitenende */
+nav {
+    margin-top: 30px;
+}
+
+
+/* ==========================================
+   LETZTE TRAININGSWERTE
+   ========================================== */
+
+.last-workout-info {
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 15px 0;
+}
+
+.last-workout-info h4 {
+    margin-top: 0;
+}
+
+.last-workout-info p {
+    margin: 6px 0;
+}
+
+
+/* ==========================================
+   ENTFERNEN-BUTTONS
+   ========================================== */
+
+/* Rote Buttons zum Entfernen */
+.remove-set,
+.remove-exercise {
+    background-color: #dc3545;
+    font-size: 12px;
+    padding: 7px 10px;
+    margin: 5px 0 10px;
+}
+
+/* Button beim Darüberfahren */
+.remove-set:hover,
+.remove-exercise:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   TRAININGSPLAN ERSTELLEN
+   ========================================== */
+
+/* Abstand zwischen den Übungen */
+.plan-exercise {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 12px;
+}
+
+/* Entfernen-Button */
+.remove-plan-exercise {
+    background-color: #dc3545;
+}
+
+.remove-plan-exercise:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   TRAININGSPLÄNE AUF DER STARTSEITE
+   ========================================== */
+
+/* Einzelne Trainingsplan-Karte */
+.plan-card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 12px 0;
+}
+
+/* Name des Trainingsplans */
+.plan-card h3 {
+    margin-top: 0;
+}
+
+/* Anzahl der Übungen */
+.plan-card p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+
+/* ==========================================
+   ANKLICKBARE TRAININGSPLÄNE
+   ========================================== */
+
+.plan-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* Visuelles Feedback beim Darüberfahren */
+.plan-card:hover {
+    background-color: #f0f0f0;
+    border-color: #aaa;
+}
+
+
+/* ==========================================
+   AKTIONEN FÜR TRAININGSPLÄNE
+   ========================================== */
+
+.plan-action {
+    display: inline-block;
+    padding: 10px 14px;
+    margin: 8px 8px 0 0;
+    background-color: #222;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.plan-action:hover {
+    background-color: #444;
+}
+
+
+/* ==========================================
+   TRAININGSPLAN LÖSCHEN
+   ========================================== */
+
+/* Roter Löschen-Button */
+.delete-plan {
+    background-color: #dc3545;
+    margin: 8px 0 0;
+}
+
+.delete-plan:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   BACKUP IMPORTIEREN
+   ========================================== */
+
+/* Abstand zum oberen Exportbereich */
+#import-section {
+    margin-top: 35px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+/* Abstand für die Dateiauswahl */
+#backup-file {
+    display: block;
+    margin: 15px 0;
+}
+
+
+/* ==========================================
+   TRAININGSHISTORIE - LÖSCHEN
+   ========================================== */
+
+/* Löschen-Button in einer Trainingseinheit */
+.delete-workout {
+    background-color: #dc3545;
+    margin-top: 15px;
+}
+
+.delete-workout:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   EINZELNE ÜBUNGEN AUS HISTORIE ENTFERNEN
+   ========================================== */
+
+.delete-exercise-history {
+    background-color: #dc3545;
+    font-size: 12px;
+    padding: 7px 10px;
+    margin: 5px 0 15px;
+}
+
+.delete-exercise-history:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   GESPEICHERTE SÄTZE BEARBEITEN
+   ========================================== */
+
+/* Einzelner Satz in der Trainingshistorie */
+.history-set {
+    margin: 10px 0;
+}
+
+/* Kleiner Bearbeiten-Button */
+.edit-set {
+    margin-left: 12px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Formular zum Bearbeiten eines Satzes */
+.set-edit-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+/* Eingabefelder für Gewicht und Wiederholungen */
+.set-edit-form input {
+    width: 90px;
+    box-sizing: border-box;
+}
+
+
+/* ==========================================
+   TRAININGSSTATISTIKEN
+   ========================================== */
+
+/* Abstand zwischen den Bereichen */
+#statistics-section {
+    margin-top: 30px;
+}
+
+/* Reiter nebeneinander anzeigen */
+.stat-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0;
+}
+
+/* Standarddesign der Reiter */
+.stat-tab {
+    background-color: #e5e5e5;
+    color: #222;
+}
+
+/* Aktuell ausgewählter Reiter */
+.stat-tab.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* Bereich für das Diagramm */
+#chart-container {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+/* Diagramm an die Bildschirmbreite anpassen */
+#chart-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Übungsauswahl */
+#exercise-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}

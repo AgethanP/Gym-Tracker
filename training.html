@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gym Tracker</title>
+
+    <!-- Verbindet unsere HTML-Datei mit dem CSS-Design -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Funktionen zum Speichern und Laden -->
+    <script src="storage.js" defer></script>
+    <!-- Lädt JavaScript, sobald das HTML eingelesen wurde -->
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Überschrift unserer App -->
+    <h1>Gym Tracker</h1>
+    <p>Dokumentiere dein Training und deine Fortschritte.</p>
+
+    <main>
+        <h2>Neues Training</h2>
+
+        <!-- Hier fügt JavaScript unsere Übungen ein -->
+        <div id="exercises"></div>
+        <!-- Vorschlagsliste für bereits trainierte Übungen -->
+        <datalist id="exercise-suggestions"></datalist>
+        <!-- Button für neue Übungen -->
+        <button type="button" id="add-exercise">
+            + Übung hinzufügen
+        </button>
+        <!-- Speichert die aktuelle Trainingseinheit -->
+        <button type="button" id="save-workout">
+            Training speichern
+        </button>
+
+        <!-- Hier erscheint eine Erfolgsmeldung oder ein Fehler -->
+        <p id="save-status" role="status"></p>
+
+        <!-- Anzahl der bereits gespeicherten Trainings -->
+        <p id="saved-count"></p>
+    </main>
+
+</body>
+</html>

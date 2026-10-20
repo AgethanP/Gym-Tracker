@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gym Tracker – Trainingshistorie</title>
+
+    <!-- Gemeinsames Design -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Zuerst Speicherfunktionen laden -->
+    <script src="storage.js" defer></script>
+
+    <!-- Danach die Funktionen der Trainingshistorie -->
+    <script src="history.js" defer></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>Trainingshistorie</h1>
+        <p>Sieh dir deine vergangenen Trainingseinheiten an.</p>
+    </header>
+
+    <main>
+        <!-- Hier zeigt JavaScript gespeicherte Trainings an -->
+        <section id="workout-history"></section>
+
+        <!-- Navigation zurück zur Startseite -->
+        <nav>
+            <a href="index.html">← Zur Startseite</a>
+        </nav>
+    </main>
+
+</body>
+</html>
