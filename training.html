@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Gym Tracker – Training</title>
+
+    <!-- Gemeinsames Design -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Unsere bestehenden JavaScript-Dateien -->
+    <script src="storage.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+
+<!-- Eigene CSS-Klasse für die Trainingsseite -->
+<body class="training-page">
+
+    <!-- Kopfbereich -->
+    <header class="training-header">
+
+        <a href="index.html" class="training-back">
+            ← Zurück
+        </a>
+
+        <span class="training-header-title">
+            GYM TRACKER
+        </span>
+
+    </header>
+
+    <main class="training-main">
+
+        <!-- Seitenüberschrift -->
+        <section class="training-intro">
+
+            <p class="training-eyebrow">
+                YOUR WORKOUT
+            </p>
+
+            <h1>Neues Training</h1>
+
+            <p>
+                Dokumentiere deine Übungen, Gewichte
+                und Wiederholungen.
+            </p>
+
+        </section>
+
+        <!-- =====================================
+            TEILNEHMER DES TRAININGS
+            ===================================== -->
+
+        <section class="training-participants">
+
+            <h2>Wer trainiert heute?</h2>
+
+            <p>Wähle aus, ob du alleine oder mit Freunden trainierst.</p>
+
+            <!-- Auswahl der Trainingsart -->
+            <div class="training-mode">
+
+                <label>
+                    <input type="radio"
+                        name="training-mode"
+                        value="solo"
+                        checked>
+                    Alleine trainieren
+                </label>
+
+                <label>
+                    <input type="radio"
+                        name="training-mode"
+                        value="friends">
+                    Mit Freunden trainieren
+                </label>
+
+            </div>
+            <!-- Zusätzliche Angaben beim Training mit Freunden -->
+            <div id="friends-section" hidden>
+
+                <!-- Anzahl der Freunde festlegen -->
+                <label for="friend-count">
+                    Wie viele Freunde trainieren mit?
+                </label>
+
+                <select id="friend-count">
+                    <option value="1">1 Freund</option>
+                    <option value="2">2 Freunde</option>
+                    <option value="3">3 Freunde</option>
+                    <option value="4">4 Freunde</option>
+                    <option value="5">5 Freunde</option>
+                </select>
+
+                <!-- Hier erstellt JavaScript die Namensfelder -->
+                <div id="friend-names"></div>
+
+            </div>
+            
+            <!-- Teilnehmer vor dem Training bestätigen -->
+            <button type="button" id="confirm-participants">
+                Teilnehmer bestätigen
+            </button>
+
+            <!-- Meldung zum aktuellen Status -->
+            <p id="participants-status" role="status"></p>
+
+        </section>
+
+        <!-- =====================================
+            AKTIVE TRAININGSPERSON
+            ===================================== -->
+
+        <section id="active-person-section" class="active-person-section">
+
+            <h2>Training erfassen für</h2>
+
+            <!-- Hier werden die Teilnehmer angezeigt -->
+            <div id="person-tabs">
+
+                <!-- Standardmäßig trainierst du alleine -->
+                <button type="button" class="person-tab active">
+                    Ich
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- Hier erstellt JavaScript alle Übungen -->
+        <!-- ID unbedingt beibehalten! -->
+        <div id="exercises"></div>
+
+        <!-- Vorschläge für bereits trainierte Übungen -->
+        <datalist id="exercise-suggestions"></datalist>
+
+        <!-- Neue Übung hinzufügen -->
+        <button type="button"
+                id="add-exercise">
+            + Übung hinzufügen
+        </button>
+
+        <!-- Training abschließen -->
+        <button type="button"
+                id="save-workout">
+            Training speichern ✓
+        </button>
+
+        <!-- Erfolgsmeldung oder Fehlermeldung -->
+        <p id="save-status" role="status"></p>
+
+        <!-- Status der automatischen Zwischenspeicherung -->
+        <p id="draft-status"
+           role="status"
+           aria-live="polite"></p>
+
+        <!-- Anzahl gespeicherter Trainingseinheiten -->
+        <p id="saved-count"></p>
+
+    </main>
+
+</body>
+</html>

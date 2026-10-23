@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Gym Tracker – Home</title>
+
+    <!-- Gemeinsames Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Bestehende JavaScript-Funktionen beibehalten -->
+    <script src="storage.js" defer></script>
+    <script src="home.js" defer></script>
+</head>
+
+<!-- home-page aktiviert das Design nur auf der Startseite -->
+<body class="home-page">
+
+    <header class="home-header">
+
+        <a href="index.html" class="home-logo">
+            <span class="logo-icon">◆</span>
+            GYM TRACKER
+        </a>
+
+        <span class="home-label">HOME</span>
+
+    </header>
+
+    <main class="home-main">
+
+        <!-- Begrüßung -->
+        <section class="home-welcome">
+            <p class="home-eyebrow">YOUR FITNESS JOURNEY</p>
+
+            <h1>Ready to train?</h1>
+
+            <p>
+                Dein Training. Dein Fortschritt. Dein Ziel.
+            </p>
+        </section>
+
+        <!-- Freies Training starten -->
+        <section class="home-start">
+
+            <a href="training.html" class="free-workout-card">
+
+                <div class="workout-card-top">
+                    <span class="workout-icon">◆</span>
+                    <span class="workout-arrow">↗</span>
+                </div>
+
+                <div>
+                    <h2>Freies Training</h2>
+                    <p>
+                        Starte dein Workout ohne festen
+                        Trainingsplan.
+                    </p>
+                </div>
+
+                <span class="start-link">
+                    Training starten →
+                </span>
+
+            </a>
+
+        </section>
+
+        <!-- Gespeicherte Trainingspläne -->
+        <section class="home-plans">
+
+            <div class="section-heading">
+                <h2>Meine Trainingspläne</h2>
+            </div>
+
+            <!-- Wichtig: Diese ID benötigt home.js -->
+            <!-- Trainingspläne werden automatisch eingefügt -->
+            <div id="saved-plans"></div>
+
+            <a href="plan-create.html" class="create-plan-link">
+                <span>＋</span>
+                Neuen Trainingsplan erstellen
+            </a>
+
+        </section>
+
+    </main>
+
+    <!-- Navigation -->
+    <nav class="home-navigation">
+
+        <a href="index.html" class="active">
+            <span class="nav-icon">⌂</span>
+            <span>Home</span>
+        </a>
+
+        <a href="training.html">
+            <span class="nav-icon">＋</span>
+            <span>Training</span>
+        </a>
+
+        <a href="history.html">
+            <span class="nav-icon">◷</span>
+            <span>Historie</span>
+        </a>
+
+        <a href="statistics.html">
+            <span class="nav-icon">▥</span>
+            <span>Statistik</span>
+        </a>
+
+        <a href="backup.html">
+            <span class="nav-icon">⇩</span>
+            <span>Backup</span>
+        </a>
+
+    </nav>
+
+</body>
+</html>

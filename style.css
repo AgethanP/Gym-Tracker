@@ -1,0 +1,1326 @@
+
+/* ==========================================
+   ALLGEMEINES DESIGN
+   ========================================== */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+    margin: 30px;
+}
+
+/* Hauptbereich der Anwendung */
+main {
+    max-width: 650px;
+}
+
+
+/* ==========================================
+   ÜBUNGEN UND SÄTZE
+   ========================================== */
+
+/* Rahmen für einzelne Übungen */
+.exercise {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Abstand zwischen den Sätzen */
+.set {
+    margin-bottom: 15px;
+}
+
+
+/* ==========================================
+   EINGABEFELDER UND BUTTONS
+   ========================================== */
+
+input {
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Button verändert sich beim Darüberfahren */
+button:hover {
+    background-color: #444;
+}
+
+
+/* ==========================================
+   TRAININGSHISTORIE
+   ========================================== */
+
+/* Einzelne gespeicherte Trainingseinheit */
+.history-workout {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Anklickbare Überschrift des Trainings */
+.history-workout summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 5px;
+}
+
+/* Abstand der angezeigten Sätze */
+.history-workout p {
+    margin: 8px 0;
+}
+
+/* Übungsüberschriften */
+.history-workout h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Navigation am Seitenende */
+nav {
+    margin-top: 30px;
+}
+
+
+/* ==========================================
+   LETZTE TRAININGSWERTE
+   ========================================== */
+
+.last-workout-info {
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 15px 0;
+}
+
+.last-workout-info h4 {
+    margin-top: 0;
+}
+
+.last-workout-info p {
+    margin: 6px 0;
+}
+
+
+/* ==========================================
+   ENTFERNEN-BUTTONS
+   ========================================== */
+
+/* Rote Buttons zum Entfernen */
+.remove-set,
+.remove-exercise {
+    background-color: #dc3545;
+    font-size: 12px;
+    padding: 7px 10px;
+    margin: 5px 0 10px;
+}
+
+/* Button beim Darüberfahren */
+.remove-set:hover,
+.remove-exercise:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   TRAININGSPLAN ERSTELLEN
+   ========================================== */
+
+/* Abstand zwischen den Übungen */
+.plan-exercise {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 12px;
+}
+
+/* Entfernen-Button */
+.remove-plan-exercise {
+    background-color: #dc3545;
+}
+
+.remove-plan-exercise:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   TRAININGSPLÄNE AUF DER STARTSEITE
+   ========================================== */
+
+/* Einzelne Trainingsplan-Karte */
+.plan-card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 12px 0;
+}
+
+/* Name des Trainingsplans */
+.plan-card h3 {
+    margin-top: 0;
+}
+
+/* Anzahl der Übungen */
+.plan-card p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+
+/* ==========================================
+   ANKLICKBARE TRAININGSPLÄNE
+   ========================================== */
+
+.plan-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* Visuelles Feedback beim Darüberfahren */
+.plan-card:hover {
+    background-color: #f0f0f0;
+    border-color: #aaa;
+}
+
+
+/* ==========================================
+   AKTIONEN FÜR TRAININGSPLÄNE
+   ========================================== */
+
+.plan-action {
+    display: inline-block;
+    padding: 10px 14px;
+    margin: 8px 8px 0 0;
+    background-color: #222;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.plan-action:hover {
+    background-color: #444;
+}
+
+
+/* ==========================================
+   TRAININGSPLAN LÖSCHEN
+   ========================================== */
+
+/* Roter Löschen-Button */
+.delete-plan {
+    background-color: #dc3545;
+    margin: 8px 0 0;
+}
+
+.delete-plan:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   BACKUP IMPORTIEREN
+   ========================================== */
+
+/* Abstand zum oberen Exportbereich */
+#import-section {
+    margin-top: 35px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+/* Abstand für die Dateiauswahl */
+#backup-file {
+    display: block;
+    margin: 15px 0;
+}
+
+
+/* ==========================================
+   TRAININGSHISTORIE - LÖSCHEN
+   ========================================== */
+
+/* Löschen-Button in einer Trainingseinheit */
+.delete-workout {
+    background-color: #dc3545;
+    margin-top: 15px;
+}
+
+.delete-workout:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   EINZELNE ÜBUNGEN AUS HISTORIE ENTFERNEN
+   ========================================== */
+
+.delete-exercise-history {
+    background-color: #dc3545;
+    font-size: 12px;
+    padding: 7px 10px;
+    margin: 5px 0 15px;
+}
+
+.delete-exercise-history:hover {
+    background-color: #b02a37;
+}
+
+
+/* ==========================================
+   GESPEICHERTE SÄTZE BEARBEITEN
+   ========================================== */
+
+/* Einzelner Satz in der Trainingshistorie */
+.history-set {
+    margin: 10px 0;
+}
+
+/* Kleiner Bearbeiten-Button */
+.edit-set {
+    margin-left: 12px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Formular zum Bearbeiten eines Satzes */
+.set-edit-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+/* Eingabefelder für Gewicht und Wiederholungen */
+.set-edit-form input {
+    width: 90px;
+    box-sizing: border-box;
+}
+
+
+/* ==========================================
+   TRAININGSSTATISTIKEN
+   ========================================== */
+
+/* Abstand zwischen den Bereichen */
+#statistics-section {
+    margin-top: 30px;
+}
+
+/* Reiter nebeneinander anzeigen */
+.stat-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0;
+}
+
+/* Standarddesign der Reiter */
+.stat-tab {
+    background-color: #e5e5e5;
+    color: #222;
+}
+
+/* Aktuell ausgewählter Reiter */
+.stat-tab.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* Bereich für das Diagramm */
+#chart-container {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+/* Diagramm an die Bildschirmbreite anpassen */
+#chart-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Übungsauswahl */
+#exercise-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+
+/* ==========================================
+   NEUES STARTSEITEN-DESIGN
+   ========================================== */
+
+/* Nur die Startseite erhält den Dark Mode */
+body.home-page {
+    margin: 0;
+    min-height: 100vh;
+    background: #0c1220;
+    color: #f9fafb;
+    font-family: Arial, sans-serif;
+}
+
+/* Alle Elemente berücksichtigen ihre Innenabstände */
+.home-page * {
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   HEADER
+   ========================================== */
+
+.home-header {
+    max-width: 1050px;
+    margin: auto;
+    padding: 25px 24px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.home-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.logo-icon {
+    display: grid;
+    place-items: center;
+
+    width: 38px;
+    height: 38px;
+
+    background: #5044c7;
+    border-radius: 12px;
+    color: white;
+}
+
+.home-label {
+    background: #1c2536;
+    color: #a5b4fc;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+/* ==========================================
+   HAUPTBEREICH
+   ========================================== */
+
+.home-main {
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 25px 24px 110px;
+}
+
+.home-welcome {
+    margin-bottom: 32px;
+}
+
+.home-eyebrow {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #a5b4fc;
+}
+
+.home-welcome h1 {
+    font-size: clamp(30px, 6vw, 46px);
+    margin: 12px 0;
+    letter-spacing: -1px;
+}
+
+.home-welcome > p:last-child {
+    color: #9ca3af;
+    font-size: 15px;
+}
+
+/* ==========================================
+   FREIES TRAINING
+   ========================================== */
+
+.free-workout-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 25px;
+
+    min-height: 230px;
+    padding: 26px;
+
+    background: linear-gradient(
+        135deg,
+        #6357df,
+        #4338ca
+    );
+
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+
+    box-shadow: 0 12px 30px rgba(67, 56, 202, 0.2);
+    transition: transform 0.2s;
+}
+
+.free-workout-card:hover {
+    transform: translateY(-3px);
+}
+
+.workout-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.workout-icon {
+    font-size: 25px;
+}
+
+.workout-arrow {
+    font-size: 26px;
+}
+
+.free-workout-card h2 {
+    margin: 0 0 8px;
+    font-size: 23px;
+}
+
+.free-workout-card p {
+    margin: 0;
+    color: #e0e7ff;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.start-link {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* ==========================================
+   MEINE TRAININGSPLÄNE
+   ========================================== */
+
+.home-plans {
+    margin-top: 40px;
+}
+
+.section-heading h2 {
+    font-size: 21px;
+    margin-bottom: 20px;
+}
+
+/* Gespeicherte Pläne als Grid darstellen */
+.home-page #saved-plans {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+/* Bestehende, von home.js erstellte Karten */
+.home-page .plan-card {
+    background: #1c2536;
+    border: 1px solid #323c50;
+    border-radius: 16px;
+
+    padding: 20px;
+    margin: 0;
+
+    color: white;
+    cursor: default;
+
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.home-page .plan-card:hover {
+    background: #252f43;
+    border-color: #7065e8;
+}
+
+.home-page .plan-card h3 {
+    font-size: 18px;
+    margin: 0 0 10px;
+}
+
+.home-page .plan-card p {
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+/* Buttons für Plan starten und bearbeiten */
+.home-page .plan-action {
+    display: inline-block;
+    background: #393365;
+    color: #ddd6fe;
+
+    padding: 10px 12px;
+    margin: 12px 6px 0 0;
+
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.home-page .plan-action:hover {
+    background: #5044c7;
+    color: white;
+}
+
+/* Bestehender Löschen-Button */
+.home-page .delete-plan {
+    display: inline-block;
+    background: #492935;
+    color: #fda4af;
+
+    padding: 10px 12px;
+    margin: 10px 0 0;
+
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.home-page .delete-plan:hover {
+    background: #7f1d1d;
+    color: white;
+}
+
+/* Neuen Trainingsplan erstellen */
+.create-plan-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    padding: 17px;
+    margin-top: 15px;
+
+    color: #c4b5fd;
+    background: #192234;
+    border: 1px dashed #5b5491;
+    border-radius: 14px;
+
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.create-plan-link:hover {
+    background: #252e46;
+}
+
+/* ==========================================
+   NAVIGATION
+   ========================================== */
+
+.home-page .home-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    justify-content: space-around;
+
+    margin: 0;
+    padding: 12px 8px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+
+    background: #111827;
+    border-top: 1px solid #30394b;
+
+    z-index: 100;
+}
+
+.home-navigation a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    flex: 1;
+
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 10px;
+}
+
+.home-navigation a.active {
+    color: #a5b4fc;
+}
+
+.nav-icon {
+    font-size: 23px;
+}
+
+/* ==========================================
+   SMARTPHONE-OPTIMIERUNG
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    .home-header {
+        padding: 18px 18px;
+    }
+
+    .home-main {
+        padding: 18px 18px 110px;
+    }
+
+    .home-welcome {
+        margin-bottom: 25px;
+    }
+
+    .free-workout-card {
+        min-height: 210px;
+        padding: 22px;
+    }
+
+    /* Auf kleinen Displays Karten untereinander */
+    .home-page #saved-plans {
+        grid-template-columns: 1fr;
+    }
+
+    .home-page .plan-card {
+        padding: 18px;
+    }
+
+    .home-navigation a {
+        font-size: 10px;
+    }
+}
+
+/* ==========================================
+   SCHRITT 17 – TRAININGSSEITE DARK MODE
+   ========================================== */
+
+/* Grunddesign nur für training.html */
+body.training-page {
+    margin: 0;
+    min-height: 100vh;
+    background: #0c1220;
+    color: #f9fafb;
+    font-family: Arial, sans-serif;
+}
+
+/* Verhindert unerwartete Überbreiten */
+.training-page * {
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   KOPFBEREICH
+   ========================================== */
+
+.training-header {
+    max-width: 900px;
+    margin: auto;
+    padding: 22px 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border-bottom: 1px solid #293244;
+}
+
+.training-back {
+    color: #a5b4fc;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.training-header-title {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #e5e7eb;
+}
+
+/* ==========================================
+   HAUPTBEREICH
+   ========================================== */
+
+.training-main {
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 24px 18px 55px;
+}
+
+.training-intro {
+    margin-bottom: 30px;
+}
+
+.training-eyebrow {
+    color: #a5b4fc;
+    font-size: 11px;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.training-intro h1 {
+    margin: 12px 0;
+    font-size: clamp(28px, 6vw, 42px);
+}
+
+.training-intro > p:last-child {
+    color: #9ca3af;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   ÜBUNGSKARTEN
+   ========================================== */
+
+.training-page .exercise {
+    background: #1c2536;
+    border: 1px solid #323c50;
+    border-radius: 18px;
+
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.training-page .exercise h3 {
+    margin-top: 0;
+    color: #ffffff;
+}
+
+/* Allgemeine Eingabefelder im Training */
+.training-page input {
+    max-width: 100%;
+    background: #101827;
+    color: #ffffff;
+
+    border: 1px solid #465168;
+    border-radius: 10px;
+
+    padding: 12px;
+    margin: 6px 0;
+
+    font-size: 16px;
+}
+
+/* Hervorhebung beim Bearbeiten */
+.training-page input:focus {
+    outline: 2px solid #818cf8;
+    border-color: #818cf8;
+}
+
+/* ==========================================
+   EINZELNE SÄTZE
+   ========================================== */
+
+.training-page .set {
+    background: #141e2e;
+    border: 1px solid #303b50;
+    border-radius: 12px;
+
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+/* Überschriften und Beschriftungen */
+.training-page label {
+    color: #e5e7eb;
+    font-size: 13px;
+}
+
+/* Gewicht und Wiederholungen */
+.training-page .set input {
+    width: 110px;
+    max-width: 100%;
+}
+
+/* ==========================================
+   LETZTE TRAININGSWERTE
+   ========================================== */
+
+.training-page .last-workout-info {
+    background: #111827;
+    color: #cbd5e1;
+
+    border: 1px solid #374151;
+    border-radius: 10px;
+
+    padding: 12px;
+    margin: 15px 0;
+}
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+/* Alle Buttons auf der Trainingsseite */
+.training-page button {
+    border: none;
+    border-radius: 10px;
+
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+/* Übung hinzufügen */
+.training-page #add-exercise {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+
+    padding: 17px;
+
+    background: #1e293b;
+    color: #c4b5fd;
+    border: 1px dashed #6366f1;
+}
+
+.training-page #add-exercise:hover {
+    background: #303659;
+}
+
+/* Training speichern */
+.training-page #save-workout {
+    display: block;
+    width: 100%;
+
+    padding: 18px;
+    margin-top: 25px;
+
+    background: linear-gradient(
+        135deg,
+        #6357df,
+        #4338ca
+    );
+
+    color: white;
+    font-size: 16px;
+}
+
+.training-page #save-workout:hover {
+    background: #3730a3;
+}
+
+/* Löschen-Buttons bleiben rot */
+.training-page .remove-set,
+.training-page .remove-exercise {
+    background: #7f1d1d;
+    color: #fecaca;
+
+    font-size: 12px;
+    padding: 10px 12px;
+}
+
+.training-page .remove-set:hover,
+.training-page .remove-exercise:hover {
+    background: #991b1b;
+}
+
+/* ==========================================
+   STATUSMELDUNGEN
+   ========================================== */
+
+.training-page #save-status {
+    font-weight: bold;
+    margin-top: 18px;
+}
+
+.training-page #draft-status {
+    color: #86efac;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+.training-page #saved-count {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+/* ==========================================
+   SMARTPHONE-OPTIMIERUNG
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    .training-header {
+        padding: 18px 16px;
+    }
+
+    .training-main {
+        padding: 20px 14px 45px;
+    }
+
+    .training-page .exercise {
+        padding: 16px;
+    }
+
+    .training-page .set {
+        padding: 12px;
+    }
+
+    /* Eingabefelder bleiben gut bedienbar */
+    .training-page .set input {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Buttons zur besseren Bedienbarkeit */
+    .training-page .exercise button {
+        min-height: 42px;
+    }
+
+    .training-page #save-workout {
+        min-height: 55px;
+    }
+}
+
+/* ==========================================
+   SCHRITT 17.2 – MOBILE SATZ-EINGABE
+   ========================================== */
+
+/* Satznummer und Entfernen-Button */
+.training-page .set-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+/* Satznummer hervorheben */
+.training-page .set-header h4 {
+    margin: 0;
+    font-size: 15px;
+    color: #f9fafb;
+}
+
+/* Entfernen-Button kompakt halten */
+.training-page .set-header .remove-set {
+    margin: 0;
+    padding: 9px 12px;
+    font-size: 12px;
+}
+
+/* Gewicht und Wiederholungen nebeneinander */
+.training-page .set-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+/* Einzelner Eingabebereich */
+.training-page .set-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Beschriftung */
+.training-page .set-field label {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* Eingabefelder nutzen ihre ganze Spaltenbreite */
+.training-page .set-field input {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    font-size: 18px;
+    text-align: center;
+}
+
+/* Satz hinzufügen */
+.training-page .add-set {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px;
+    background: #393365;
+    color: #ddd6fe;
+}
+
+.training-page .add-set:hover {
+    background: #5044c7;
+}
+
+/* Besonders kleine Smartphone-Displays */
+@media (max-width: 360px) {
+
+    .training-page .set-inputs {
+        gap: 8px;
+    }
+
+    .training-page .set-field input {
+        padding: 10px 6px;
+        font-size: 16px;
+    }
+}
+
+
+/* ==========================================
+   SCHRITT 18.1 – TEILNEHMERAUSWAHL
+   ========================================== */
+
+.training-page .training-participants {
+    background: #1c2536;
+    border: 1px solid #323c50;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.training-page .training-participants h2 {
+    margin-top: 0;
+    font-size: 20px;
+}
+
+.training-page .training-participants p {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* Auswahlmöglichkeiten untereinander */
+.training-page .training-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.training-page .training-mode label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    background: #141e2e;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 14px;
+
+    cursor: pointer;
+}
+
+/* Radio-Buttons */
+.training-page .training-mode input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: #818cf8;
+}
+
+/* ==========================================
+   SCHRITT 18.2 – FREUNDESNAMEN
+   ========================================== */
+
+/* Versteckte Bereiche wirklich ausblenden */
+.training-page [hidden] {
+    display: none !important;
+}
+
+/* Eingabebereich für Freunde */
+.training-page #friends-section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #374151;
+}
+
+/* Auswahl der Freundesanzahl */
+.training-page #friend-count {
+    display: block;
+    width: 100%;
+    margin: 10px 0 20px;
+    padding: 13px;
+
+    background: #101827;
+    color: white;
+    border: 1px solid #465168;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+/* Abstand zwischen den Namensfeldern */
+.training-page .friend-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+/* Namensfelder */
+.training-page .friend-field input {
+    width: 100%;
+    margin: 0;
+}
+
+/* ==========================================
+   SCHRITT 18.3 – PERSONENAUSWAHL
+   ========================================== */
+
+.training-page .active-person-section {
+    margin: 25px 0 20px;
+}
+
+.training-page .active-person-section h2 {
+    font-size: 18px;
+    margin-bottom: 14px;
+}
+
+/* Teilnehmer nebeneinander darstellen */
+.training-page #person-tabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+/* Einzelner Teilnehmer */
+.training-page .person-tab {
+    flex-shrink: 0;
+    background: #1c2536;
+    color: #9ca3af;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 12px 20px;
+}
+
+/* Aktuell ausgewählte Person */
+.training-page .person-tab.active {
+    background: #5044c7;
+    color: white;
+    border-color: #818cf8;
+}
+
+/* ==========================================
+   MEHRPERSONEN-TRAINING IN DER HISTORIE
+   ========================================== */
+
+.history-person {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.history-person h3 {
+    margin-top: 0;
+    color: #4338ca;
+}
+
+.history-person .history-exercise {
+    padding: 10px 0;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.history-person .history-exercise:last-child {
+    border-bottom: none;
+}
+
+/* ==========================================
+   STATISTIK – PERSONENAUSWAHL
+   ========================================== */
+
+#statistics-person-section {
+    margin: 25px 0;
+}
+
+#statistics-person-section h2 {
+    margin-bottom: 12px;
+}
+
+#statistics-person {
+    display: block;
+    width: 100%;
+    max-width: 350px;
+
+    margin-top: 10px;
+    padding: 12px;
+
+    background: white;
+    color: #222;
+
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    font-size: 16px;
+}
+
+/* ==========================================
+   SCHRITT 18.7.1 – TEILNEHMER BESTÄTIGEN
+   ========================================== */
+
+.training-page #confirm-participants {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+
+    background: #5044c7;
+    color: white;
+}
+
+.training-page #confirm-participants:disabled {
+    background: #24513f;
+    color: #bbf7d0;
+    cursor: default;
+}
+
+/* Gesperrte Eingabefelder */
+.training-page .training-participants input:disabled,
+.training-page .training-participants select:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.training-page #participants-status {
+    color: #86efac;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+/* Abgeschlossenes Training */
+.training-page #save-workout:disabled {
+    background: #24513f;
+    color: #bbf7d0;
+    cursor: default;
+    opacity: 0.85;
+}

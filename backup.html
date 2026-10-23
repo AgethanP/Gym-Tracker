@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Datensicherung – Gym Tracker</title>
+
+    <!-- Gemeinsames Design -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Funktionen zum Laden gespeicherter Daten -->
+    <script src="storage.js" defer></script>
+
+    <!-- Funktionen zur Datensicherung -->
+    <script src="backup.js" defer></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>Datensicherung</h1>
+        <p>Sichere deine Trainingsdaten.</p>
+    </header>
+
+    <main>
+
+        <section>
+            <h2>Backup erstellen</h2>
+
+            <p>
+                Lade deine gespeicherten Trainingseinheiten
+                und Trainingspläne als JSON-Datei herunter.
+            </p>
+
+            <!-- Startet den Export der Daten -->
+            <button type="button" id="export-backup">
+                Backup herunterladen
+            </button>
+
+            <!-- Meldung nach dem Export -->
+            <p id="backup-status" role="status"></p>
+        </section>
+
+        <!-- ==========================================
+            BACKUP IMPORTIEREN
+            ========================================== -->
+
+        <section id="import-section">
+
+            <h2>Backup wiederherstellen</h2>
+
+            <p>
+                Wähle eine zuvor exportierte JSON-Datei aus.
+                Deine aktuellen Trainingsdaten werden nach
+                deiner Bestätigung durch das Backup ersetzt.
+            </p>
+
+            <!-- Nur JSON-Dateien zur Auswahl anbieten -->
+            <input
+                type="file"
+                id="backup-file"
+                accept=".json,application/json"
+            >
+
+            <!-- Importierte Daten überprüfen und wiederherstellen -->
+            <button type="button" id="import-backup">
+                Backup importieren
+            </button>
+
+            <!-- Erfolgsmeldungen und Fehler -->
+            <p id="import-status" role="status"></p>
+
+        </section>
+
+        <nav>
+            <a href="index.html">← Zur Startseite</a>
+        </nav>
+
+    </main>
+
+</body>
+</html>

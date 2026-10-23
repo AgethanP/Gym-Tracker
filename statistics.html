@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Statistiken – Gym Tracker</title>
+
+    <!-- Gemeinsames Design -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Gespeicherte Trainings laden -->
+    <script src="storage.js" defer></script>
+
+    <!-- Funktionen für Statistiken -->
+    <script src="statistics.js" defer></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>Trainingsstatistiken</h1>
+        <p>Analysiere deinen Fortschritt.</p>
+    </header>
+
+    <main>           
+        <!-- =====================================
+            PERSON FÜR STATISTIK AUSWÄHLEN
+            ===================================== -->
+        <section id="statistics-person-section">
+
+            <h2>Person auswählen</h2>
+
+            <label for="statistics-person">
+                Wessen Fortschritt möchtest du sehen?
+            </label>
+
+            <select id="statistics-person">
+                <!-- JavaScript fügt die Personen hinzu -->
+            </select>
+
+        </section>
+        <!-- Übung auswählen -->
+        <section>
+            <h2>Übung auswählen</h2>
+
+            <label for="exercise-select">Übung:</label>
+
+            <select id="exercise-select">
+                <option value="">Übung auswählen</option>
+            </select>
+        </section>
+
+        <!-- Verschiedene Auswertungen -->
+        <section id="statistics-section">
+
+            <h2>Fortschritt</h2>
+
+            <div class="stat-tabs">
+
+                <button type="button"
+                        class="stat-tab active"
+                        data-stat="max">
+                    Max. Gewicht
+                </button>
+
+                <button type="button"
+                        class="stat-tab"
+                        data-stat="set">
+                    Satzgewicht
+                </button>
+
+                <button type="button"
+                        class="stat-tab"
+                        data-stat="reps">
+                    Wiederholungen
+                </button>
+
+                <button type="button"
+                        class="stat-tab"
+                        data-stat="volume">
+                    Volumen
+                </button>
+
+            </div>
+
+            <!-- Später: Satznummer auswählen -->
+            <div id="set-selection" hidden>
+                <label for="set-number">Satz:</label>
+                <select id="set-number"></select>
+                <p class="stat-hint">
+                    Es wird immer dieselbe Satzposition verglichen,
+                    beispielsweise Satz 2 aus verschiedenen Trainingseinheiten.
+                    Aufwärmsätze können diesen Vergleich beeinflussen.
+                </p>
+            </div>
+
+            <!-- Überschrift der aktuellen Statistik -->
+            <h3 id="chart-title">Maximales Gewicht</h3>
+
+            <!-- Erklärung der angezeigten Daten -->
+            <p id="chart-description">
+                Pro Trainingseinheit wird das höchste verwendete
+                Gewicht der ausgewählten Übung angezeigt.
+            </p>
+
+            <!-- Hier zeichnet JavaScript das Diagramm -->
+            <div id="chart-container"></div>
+
+            <!-- Statusmeldungen -->
+            <p id="statistics-status" role="status"></p>
+
+        </section>
+
+        <nav>
+            <a href="index.html">← Zur Startseite</a>
+        </nav>
+
+    </main>
+
+</body>
+</html>
