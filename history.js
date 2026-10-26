@@ -23,7 +23,7 @@ function displayGroupWorkout(workout, workoutElement, date) {
     workoutElement.appendChild(summary);
 
     // Jede teilnehmende Person anzeigen
-    workout.participants.forEach(function(person) {
+    workout.participants.forEach(function(person, personIndex) {
 
         const personElement = document.createElement("section");
         personElement.className = "history-person";
@@ -34,7 +34,7 @@ function displayGroupWorkout(workout, workoutElement, date) {
         personElement.appendChild(personTitle);
 
         // Übungen dieser Person anzeigen
-        (person.exercises || []).forEach(function(exercise) {
+        (person.exercises || []).forEach(function(exercise, exerciseIndex) {
 
             const exerciseElement = document.createElement("div");
             exerciseElement.className = "history-exercise";
@@ -43,16 +43,173 @@ function displayGroupWorkout(workout, workoutElement, date) {
             title.textContent = exercise.name;
             exerciseElement.appendChild(title);
 
-            // Alle Sätze der Übung anzeigen
-            exercise.sets.forEach(function(set, index) {
+                    
+        // ==========================================
+        // SÄTZE EINES GRUPPENTRAININGS BEARBEITEN
+        // ==========================================
 
-                const setText = document.createElement("p");
+        exercise.sets.forEach(function(set, setIndex) {
 
-                setText.textContent =
-                    `Satz ${index + 1}: ${set.weight} kg × ${set.reps} Wiederholungen`;
+            // Container für einen Satz
+            const setElement = document.createElement("div");
+            setElement.className = "history-set";
 
-                exerciseElement.appendChild(setText);
+            // Gespeicherte Werte anzeigen
+            const setText = document.createElement("span");
+            setText.textContent =
+                `Satz ${setIndex + 1}: ${set.weight} kg × ${set.reps} Wiederholungen`;
+
+            setElement.appendChild(setText);
+
+            // Bearbeiten-Button erstellen
+            const editButton = document.createElement("button");
+            editButton.type = "button";
+            editButton.className = "edit-set";
+            editButton.textContent = "Bearbeiten";
+
+            editButton.addEventListener("click", function() {
+
+                // Verhindern, dass dasselbe Formular mehrfach geöffnet wird
+                if (setElement.querySelector(".set-edit-form")) {
+                    return;
+                }
+
+                // Eingabebereich erstellen
+                const form = document.createElement("div");
+                form.className = "set-edit-form";
+
+                // Gewicht eingeben
+                const weightInput = document.createElement("input");
+                weightInput.type = "number";
+                weightInput.min = "0";
+                weightInput.step = "0.5";
+                weightInput.value = set.weight;
+                weightInput.setAttribute("aria-label", "Gewicht in kg");
+
+                // Wiederholungen eingeben
+                const repsInput = document.createElement("input");
+                repsInput.type = "number";
+                repsInput.min = "1";
+                repsInput.step = "1";
+                repsInput.value = set.reps;
+                repsInput.setAttribute("aria-label", "Wiederholungen");
+
+                // Speichern-Button
+                const saveButton = document.createElement("button");
+                saveButton.type = "button";
+                saveButton.textContent = "Speichern";
+
+                // Abbrechen-Button
+                const cancelButton = document.createElement("button");
+                cancelButton.type = "button";
+                cancelButton.textContent = "Abbrechen";
+
+                // Änderungen speichern
+                saveButton.addEventListener("click", function() {
+
+                    const weightValue = weightInput.value;
+                    const repsValue = repsInput.value;
+
+                    const weight = Number(weightValue);
+                    const reps = Number(repsValue);
+
+                    // Eingaben prüfen
+                    if (
+                        weightValue === "" ||
+                        repsValue === "" ||
+                        !Number.isFinite(weight) ||
+                        weight < 0 ||
+                        !Number.isInteger(reps) ||
+                        reps < 1
+                    ) {
+                        alert("Bitte gültige Werte eingeben.");
+                        return;
+                    }
+
+                    try {
+                        // Nur diesen Satz dieser Person aktualisieren
+                        updateGroupSetInStorage(
+                            workout.id,
+                            personIndex,
+                            exerciseIndex,
+                            setIndex,
+                            weight,
+                            reps
+                        );
+
+                        // Historie neu laden
+                        displayWorkoutHistory();
+
+                    } catch (error) {
+                        console.error("Fehler beim Bearbeiten:", error);
+                        alert(error.message);
+                    }
+                });
+
+                // Bearbeitung abbrechen
+                cancelButton.addEventListener("click", function() {
+                    form.remove();
+                    setText.hidden = false;
+                    editButton.hidden = false;
+                });
+
+                // Formular zusammensetzen
+                form.appendChild(weightInput);
+                form.appendChild(repsInput);
+                form.appendChild(saveButton);
+                form.appendChild(cancelButton);
+
+                // Alte Anzeige während der Bearbeitung ausblenden
+                setText.hidden = true;
+                editButton.hidden = true;
+
+                setElement.appendChild(form);
             });
+
+            setElement.appendChild(editButton);
+            exerciseElement.appendChild(setElement);
+        });
+        // ==========================================
+        // EINZELNE ÜBUNG AUS GRUPPENTRAINING LÖSCHEN
+        // ==========================================
+        // Löschbutton erstellen
+        const deleteExerciseButton = document.createElement("button");
+
+        deleteExerciseButton.type = "button";
+        deleteExerciseButton.className = "delete-exercise-history";
+        deleteExerciseButton.textContent = "Übung löschen";
+
+        // Auf Klick reagieren
+        deleteExerciseButton.addEventListener("click", function() {
+
+            // Vor dem Löschen nachfragen
+            const confirmed = confirm(
+                `Möchtest du "${exercise.name}" von ${person.name} wirklich löschen?`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                // Nur diese Übung der ausgewählten Person löschen
+                deleteGroupExerciseFromWorkout(
+                    workout.id,
+                    personIndex,
+                    exerciseIndex
+                );
+
+                // Aktualisierte Trainingshistorie anzeigen
+                displayWorkoutHistory();
+
+            } catch (error) {
+                console.error("Fehler beim Löschen:", error);
+                alert(error.message);
+            }
+        });
+
+        // Button direkt unter die Übung setzen
+        exerciseElement.appendChild(deleteExerciseButton);
 
             personElement.appendChild(exerciseElement);
         });

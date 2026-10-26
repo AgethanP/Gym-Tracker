@@ -351,7 +351,9 @@ function saveWorkout() {
 
     saveButton.disabled = true;
     saveButton.textContent = "Training abgeschlossen ✓";
-
+    // Button für ein neues Training sichtbar machen
+    const newWorkoutButton = document.getElementById("new-workout");
+    newWorkoutButton.hidden = false;
     updateSavedCount();
     loadExerciseSuggestions();
 }
@@ -1384,3 +1386,20 @@ confirmParticipantsButton.addEventListener(
 // Erst jetzt sind alle Variablen und Event-Listener
 // für die Teilnehmerverwaltung vorbereitet.
 restoreWorkoutDraft();
+
+// ==========================================
+// SCHRITT 21.2 – NEUES TRAINING STARTEN
+// ==========================================
+
+const newWorkoutButton = document.getElementById("new-workout");
+
+newWorkoutButton.addEventListener("click", function() {
+
+    // 1. Gespeicherten Entwurf entfernen
+    // Bereits abgeschlossene Trainings bleiben erhalten.
+    clearWorkoutDraft();
+
+    // 2. Trainingsseite neu öffnen
+    // Ohne ?plan=... starten wir ein freies Training.
+    window.location.href = "training.html";
+});

@@ -318,3 +318,135 @@ function clearWorkoutDraft() {
 
     localStorage.removeItem(DRAFT_STORAGE_KEY);
 }
+
+// ==========================================
+// SATZ EINES GRUPPENTRAININGS AKTUALISIEREN
+// ==========================================
+
+function updateGroupSetInStorage(
+    workoutId,
+    personIndex,
+    exerciseIndex,
+    setIndex,
+    weight,
+    reps
+) {
+
+    // 1. Neue Trainingswerte überprüfen
+    if (
+        !Number.isFinite(weight) ||
+        weight < 0 ||
+        !Number.isInteger(reps) ||
+        reps < 1
+    ) {
+        throw new Error("Ungültiges Gewicht oder Wiederholungszahl.");
+    }
+
+    // 2. Gespeicherte Trainings laden
+    const workouts = loadWorkouts();
+
+    // 3. Gesuchtes Training finden
+    const workout = workouts.find(function(item) {
+        return item.id === workoutId;
+    });
+
+    if (!workout) {
+        throw new Error("Training nicht gefunden.");
+    }
+
+    // 4. Prüfen, ob es ein Gruppentraining ist
+    if (!Array.isArray(workout.participants)) {
+        throw new Error("Kein Gruppentraining gefunden.");
+    }
+
+    // 5. Richtige Person finden
+    const person = workout.participants[personIndex];
+
+    if (!person) {
+        throw new Error("Person nicht gefunden.");
+    }
+
+    // 6. Richtige Übung finden
+    const exercise = person.exercises[exerciseIndex];
+
+    if (!exercise) {
+        throw new Error("Übung nicht gefunden.");
+    }
+
+    // 7. Richtigen Satz finden
+    const set = exercise.sets[setIndex];
+
+    if (!set) {
+        throw new Error("Satz nicht gefunden.");
+    }
+
+    // 8. Nur die Werte dieses Satzes verändern
+    set.weight = weight;
+    set.reps = reps;
+
+    // 9. Aktualisierte Trainings speichern
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(workouts)
+    );
+}
+
+// ==========================================
+// ÜBUNG EINER PERSON AUS GRUPPENTRAINING LÖSCHEN
+// ==========================================
+
+function deleteGroupExerciseFromWorkout(
+    workoutId,
+    personIndex,
+    exerciseIndex
+) {
+
+    // 1. Gespeicherte Trainings laden
+    const workouts = loadWorkouts();
+
+    // 2. Das richtige Training suchen
+    const workout = workouts.find(function(item) {
+        return item.id === workoutId;
+    });
+
+    if (!workout) {
+        throw new Error("Training nicht gefunden.");
+    }
+
+    // 3. Überprüfen, ob es ein Gruppentraining ist
+    if (!Array.isArray(workout.participants)) {
+        throw new Error("Kein Gruppentraining gefunden.");
+    }
+
+    // 4. Die richtige Person auswählen
+    const person = workout.participants[personIndex];
+
+    if (!person) {
+        throw new Error("Person nicht gefunden.");
+    }
+
+    // 5. Überprüfen, ob die Übung vorhanden ist
+    if (
+        !Number.isInteger(exerciseIndex) ||
+        exerciseIndex < 0 ||
+        exerciseIndex >= person.exercises.length
+    ) {
+        throw new Error("Übung nicht gefunden.");
+    }
+
+    // 6. Letzte Übung einer Person schützen
+    if (person.exercises.length === 1) {
+        throw new Error(
+            "Die letzte Übung einer Person kann nicht gelöscht werden."
+        );
+    }
+
+    // 7. Nur die ausgewählte Übung entfernen
+    person.exercises.splice(exerciseIndex, 1);
+
+    // 8. Aktualisierte Trainings speichern
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(workouts)
+    );
+}

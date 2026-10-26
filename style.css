@@ -1324,3 +1324,212 @@ body.training-page {
     cursor: default;
     opacity: 0.85;
 }
+
+/* ==========================================
+   TRAININGSKALENDER
+   ========================================== */
+
+.calendar-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.calendar-container {
+    margin-top: 30px;
+}
+
+#calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.calendar-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    background: #252525;
+    color: white;
+}
+
+.calendar-day.today {
+    background: #2563eb;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .calendar-page {
+        padding: 14px;
+    }
+
+    #calendar-days {
+        gap: 4px;
+    }
+
+    .calendar-day {
+        font-size: 13px;
+    }
+}
+
+/* ==========================================
+   KALENDER – MONAT UND WOCHENTAGE
+   ========================================== */
+
+.calendar-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.calendar-navigation h2 {
+    margin: 0;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.calendar-navigation button {
+    background: #252525;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+.calendar-navigation button:hover {
+    background: #383838;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 24px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.calendar-weekdays span {
+    min-width: 0;
+}
+
+/* ==========================================
+   TRAININGSTAGE IM KALENDER MARKIEREN
+   ========================================== */
+
+.calendar-day {
+    position: relative;
+}
+
+/* Grüner Punkt für absolvierte Trainings */
+.workout-marker {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 7px;
+    height: 7px;
+
+    background: #22c55e;
+    border-radius: 50%;
+}
+
+/* Aktueller Tag mit Trainingsmarkierung */
+.calendar-day.today .workout-marker {
+    background: #bbf7d0;
+}
+
+/* ==========================================
+   KALENDER – TRAININGSDETAILS
+   ========================================== */
+
+.calendar-day {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.calendar-day:hover {
+    filter: brightness(1.25);
+}
+
+#calendar-details {
+    margin-top: 28px;
+    padding: 20px;
+    background: #252525;
+    color: white;
+    border-radius: 12px;
+}
+
+/* Versteckte Details müssen unsichtbar bleiben */
+#calendar-details[hidden] {
+    display: none;
+}
+
+#calendar-details h3 {
+    margin-top: 0;
+}
+
+.calendar-workout {
+    padding: 15px 0;
+    border-bottom: 1px solid #444;
+}
+
+.calendar-workout:last-child {
+    border-bottom: none;
+}
+
+.calendar-workout h4 {
+    margin-bottom: 10px;
+    color: #86efac;
+}
+
+.calendar-exercise-name {
+    font-weight: bold;
+    margin-top: 14px;
+}
+
+.calendar-workout p {
+    margin-bottom: 6px;
+}
+/* ==========================================
+   AUSGEWÄHLTER KALENDERTAG
+   ========================================== */
+
+.calendar-day.selected {
+    outline: 2px solid #22c55e;
+    outline-offset: -2px;
+}
+
+/* Heute bleibt auch bei Auswahl blau */
+.calendar-day.today.selected {
+    background: #2563eb;
+    outline: 2px solid #22c55e;
+}
+
+/* Button zum Starten eines neuen Trainings */
+
+.training-page #new-workout[hidden] {
+    display: none;
+}
+
+.training-page #new-workout {
+    margin-top: 12px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.training-page #new-workout:hover {
+    background: #1d4ed8;
+}

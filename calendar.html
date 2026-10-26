@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Trainingskalender – Gym Tracker</title>
+
+    <!-- Bestehendes Design verwenden -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="calendar-page">
+
+        <h1>Trainingskalender</h1>
+
+        <p>
+            Hier siehst du deine Trainingstage.
+        </p>
+
+        <!-- Navigation zurück zur Startseite -->
+        <a href="index.html">← Zurück zur Startseite</a>
+
+        <!-- Aktueller Monat -->
+        <section class="calendar-container">
+
+                        
+            <!-- Navigation zwischen den Monaten -->
+            <div class="calendar-navigation">
+                <button type="button" id="previous-month">
+                    ←
+                </button>
+
+                <h2 id="calendar-month"></h2>
+                <button type="button" id="next-month">
+                    →
+                </button>
+            </div>
+
+            <!-- Wochentage -->
+            <div class="calendar-weekdays">
+                <span>Mo</span>
+                <span>Di</span>
+                <span>Mi</span>
+                <span>Do</span>
+                <span>Fr</span>
+                <span>Sa</span>
+                <span>So</span>
+            </div>
+
+            <!-- Hier erscheinen die Kalendertage -->
+            <div id="calendar-days"></div>              
+            <!-- ==========================================
+                TRAININGSDETAILS DES AUSGEWÄHLTEN TAGES
+                ========================================== -->
+            <section id="calendar-details" hidden>
+
+                <h3 id="calendar-details-title"></h3>
+
+                <!-- Hier erscheinen die Trainingsdaten -->
+                <div id="calendar-workouts"></div>
+
+            </section>
+
+        </section>
+
+    </main>
+    <!-- Zugriff auf gespeicherte Trainingsdaten -->
+    <script src="storage.js"></script>
+    <!-- Kalenderlogik -->
+    <script src="calendar.js"></script>
+
+</body>
+</html>
