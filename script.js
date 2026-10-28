@@ -756,14 +756,6 @@ function loadSelectedPlan() {
     heading.textContent = `Neues Training – ${selectedPlan.name}`;
 }
 
-
-// ==========================================
-// AUSGEWÄHLTEN TRAININGSPLAN BEIM START LADEN
-// ==========================================
-
-loadSelectedPlan();
-
-
 // ==========================================
 // LAUFENDES TRAINING AUTOMATISCH SICHERN
 // ==========================================
@@ -1383,8 +1375,11 @@ confirmParticipantsButton.addEventListener(
 // APP INITIALISIEREN – ENTWURF WIEDERHERSTELLEN
 // ==========================================
 
-// Erst jetzt sind alle Variablen und Event-Listener
-// für die Teilnehmerverwaltung vorbereitet.
+// Gespeicherten Trainingsplan erst laden,
+// nachdem die Teilnehmerverwaltung vorbereitet wurde
+loadSelectedPlan();
+
+// Anschließend ein eventuell laufendes Training wiederherstellen
 restoreWorkoutDraft();
 
 // ==========================================
