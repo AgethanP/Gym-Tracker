@@ -17,22 +17,42 @@
     <script src="history.js" defer></script>
 </head>
 
-<body>
+<body class="history-page">
 
-    <header>
-        <h1>Trainingshistorie</h1>
-        <p>Sieh dir deine vergangenen Trainingseinheiten an.</p>
-    </header>
+    
+    <!-- ==========================================
+        TRAININGSHISTORIE
+        ========================================== -->
 
-    <main>
-        <!-- Hier zeigt JavaScript gespeicherte Trainings an -->
+    <main class="history-main">
+
+        <!-- Seitenüberschrift -->
+        <header class="history-header">
+
+            <p class="history-eyebrow">DEIN FORTSCHRITT</p>
+
+            <h1>Trainingshistorie</h1>
+
+            <p>
+                Sieh dir deine vergangenen Trainingseinheiten an.
+            </p>
+
+        </header>
+
+        <!--
+            Hier erzeugt history.js automatisch
+            die gespeicherten Trainingseinheiten.
+
+            Die ID muss unverändert bleiben!
+        -->
         <section id="workout-history"></section>
 
-        <!-- Navigation zurück zur Startseite -->
-        <nav>
-            <a href="index.html">← Zur Startseite</a>
-        </nav>
     </main>
+
+
+<!-- Gemeinsames Farbschema und Navigation -->
+<script src="theme.js"></script>
+<script src="navigation.js"></script>
 
 </body>
 </html>

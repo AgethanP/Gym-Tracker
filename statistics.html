@@ -18,14 +18,17 @@
     <script src="statistics.js" defer></script>
 </head>
 
-<body>
+<body class="statistics-page">
 
-    <header>
+        <!-- Überschrift der Statistikseite -->
+    <header class="statistics-header">
+        <p class="statistics-eyebrow">DEIN FORTSCHRITT</p>
         <h1>Trainingsstatistiken</h1>
         <p>Analysiere deinen Fortschritt.</p>
     </header>
 
-    <main>           
+    <!-- Hauptbereich -->
+    <main class="statistics-main">          
         <!-- =====================================
             PERSON FÜR STATISTIK AUSWÄHLEN
             ===================================== -->
@@ -113,12 +116,11 @@
             <p id="statistics-status" role="status"></p>
 
         </section>
-
-        <nav>
-            <a href="index.html">← Zur Startseite</a>
-        </nav>
-
     </main>
+
+<!-- Gemeinsames Farbschema und Navigation -->
+<script src="theme.js"></script>
+<script src="navigation.js"></script>
 
 </body>
 </html>

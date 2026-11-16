@@ -1,246 +1,250 @@
+"use strict";
 
 // ==========================================
-// GYM TRACKER - TRAININGSPLAN ERSTELLEN
+// GYM TRACKER – TRAININGSPLÄNE ERSTELLEN
 // ==========================================
+// Kompatibel mit plan-create.html und storage.js.
+// Gespeicherte Pläne behalten ihr bisheriges Format:
+// { id, name, exercises: ["Übung 1", "Übung 2"] }
 
-// HTML-Bereich für die Übungen finden
 const planExercises = document.getElementById("plan-exercises");
+const planNameInput = document.getElementById("plan-name");
+const addExerciseButton = document.getElementById("add-plan-exercise");
+const savePlanButton = document.getElementById("save-plan");
+const planStatus = document.getElementById("plan-status");
 
-// Zähler für eindeutige Eingabefeld-IDs
+const editPlanId = new URLSearchParams(window.location.search).get("edit");
+let editingPlan = null;
 let planExerciseCount = 0;
 
+// Statusmeldungen auch für Screenreader bereitstellen.
+planStatus.setAttribute("role", "status");
+planStatus.setAttribute("aria-live", "polite");
+
 
 // ==========================================
-// FUNKTION: ÜBUNG HINZUFÜGEN
+// STATUSMELDUNGEN
 // ==========================================
 
-function addPlanExercise() {
+function showPlanStatus(message, isError = false) {
+    planStatus.textContent = message;
+    planStatus.style.color = message
+        ? (isError ? "var(--color-danger)" : "var(--color-success)")
+        : "";
+}
 
-    // Eindeutige Nummer erhöhen
-    planExerciseCount++;
-
-    // Neuen HTML-Bereich erstellen
-    const exercise = document.createElement("div");
-    exercise.className = "plan-exercise";
-
-    // Eingabefeld und Entfernen-Button erstellen
-    exercise.innerHTML = `
-        <label for="plan-exercise-${planExerciseCount}">
-            Übung:
-        </label>
-
-        <input
-            type="text"
-            id="plan-exercise-${planExerciseCount}"
-            placeholder="z. B. Bankdrücken"
-        >
-
-        <button type="button" class="remove-plan-exercise">
-            Entfernen
-        </button>
-    `;
-
-    // Übung auf der Webseite anzeigen
-    planExercises.appendChild(exercise);
+function clearPlanStatus() {
+    showPlanStatus("");
 }
 
 
 // ==========================================
-// EVENT: ÜBUNG HINZUFÜGEN
+// ÜBUNGSFELD HINZUFÜGEN
 // ==========================================
 
-document.getElementById("add-plan-exercise")
-    .addEventListener("click", addPlanExercise);
+function addPlanExercise(exerciseName = "") {
+    // Eine fortlaufende Nummer verhindert doppelte HTML-IDs,
+    // auch wenn zuvor andere Übungen entfernt wurden.
+    planExerciseCount++;
+    const inputId = `plan-exercise-${planExerciseCount}`;
 
+    const exercise = document.createElement("div");
+    exercise.className = "plan-exercise";
 
-// ==========================================
-// EVENT: ÜBUNG ENTFERNEN
-// ==========================================
+    const label = document.createElement("label");
+    label.htmlFor = inputId;
+    label.textContent = "Übung:";
 
-planExercises.addEventListener("click", function(event) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = inputId;
+    input.placeholder = "z. B. Bankdrücken";
+    input.autocomplete = "off";
+    input.value = exerciseName;
 
-    // Nur auf den Entfernen-Button reagieren
-    if (!event.target.classList.contains("remove-plan-exercise")) {
-        return;
-    }
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "remove-plan-exercise";
+    removeButton.textContent = "Entfernen";
+    removeButton.setAttribute("aria-label", "Übung aus dem Trainingsplan entfernen");
 
-    // Die zugehörige Übung finden
-    const exercise = event.target.closest(".plan-exercise");
+    removeButton.addEventListener("click", function() {
+        exercise.remove();
+        clearPlanStatus();
+    });
 
-    // Übung entfernen
-    exercise.remove();
+    exercise.append(label, input, removeButton);
+    planExercises.appendChild(exercise);
+    clearPlanStatus();
+
+    return input;
+}
+
+addExerciseButton.addEventListener("click", function() {
+    const input = addPlanExercise();
+    input.focus();
 });
 
-
-// ==========================================
-// SEITE INITIALISIEREN
-// ==========================================
-
-// Beim Öffnen direkt ein Übungsfeld anzeigen
-addPlanExercise();
+// Eine alte Fehlermeldung entfernen, sobald die Eingabe korrigiert wird.
+planNameInput.addEventListener("input", clearPlanStatus);
+planExercises.addEventListener("input", clearPlanStatus);
 
 
 // ==========================================
-// FUNKTION: TRAININGSPLAN SPEICHERN
+// EINGABEN PRÜFEN
 // ==========================================
 
-function savePlan() {
+function readPlanInputs() {
+    const planName = planNameInput.value.trim();
 
-    // Namen des Trainingsplans auslesen
-    const planName = document.getElementById("plan-name")
-        .value.trim();
-
-    // Statusbereich für Fehlermeldungen
-    const status = document.getElementById("plan-status");
-
-    // Prüfen, ob ein Planname eingegeben wurde
-    if (planName === "") {
-        status.textContent = "Bitte gib einen Namen für den Trainingsplan ein.";
-        return;
+    if (!planName) {
+        showPlanStatus("Bitte gib einen Namen für den Trainingsplan ein.", true);
+        planNameInput.focus();
+        return null;
     }
 
-    // Alle Übungsnamen sammeln
-    const exerciseNames = [];
-
-    const exerciseInputs = document.querySelectorAll(
-        ".plan-exercise input"
+    const exerciseInputs = planExercises.querySelectorAll(
+        '.plan-exercise input[type="text"]'
     );
 
-    // Jede eingegebene Übung überprüfen
-    for (const input of exerciseInputs) {
+    if (exerciseInputs.length === 0) {
+        showPlanStatus("Bitte füge mindestens eine Übung hinzu.", true);
+        return null;
+    }
 
+    const exerciseNames = [];
+
+    for (const input of exerciseInputs) {
         const name = input.value.trim();
 
-        if (name === "") {
-            status.textContent = "Bitte fülle alle Übungsfelder aus.";
-            return;
+        if (!name) {
+            showPlanStatus("Bitte fülle alle Übungsfelder aus.", true);
+            input.focus();
+            return null;
         }
 
         exerciseNames.push(name);
     }
 
-    // Mindestens eine Übung muss vorhanden sein
-    if (exerciseNames.length === 0) {
-        status.textContent = "Bitte füge mindestens eine Übung hinzu.";
+    // Doppelte Übungsnamen bleiben erlaubt, falls ein Plan
+    // dieselbe Übung bewusst mehrfach enthalten soll.
+    return { name: planName, exercises: exerciseNames };
+}
+
+
+// ==========================================
+// NEUE PLAN-ID ERZEUGEN
+// ==========================================
+
+function createPlanId() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+    }
+
+    // Ersatz für Browser ohne crypto.randomUUID().
+    // Diese ID dient nur der lokalen Zuordnung, nicht der Sicherheit.
+    return `plan-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+
+// ==========================================
+// TRAININGSPLAN SPEICHERN
+// ==========================================
+
+function savePlan() {
+    // Bei einem ungültigen Bearbeitungslink oder laufenden
+    // Speichervorgang keine weiteren Änderungen zulassen.
+    if (savePlanButton.disabled) {
         return;
     }
 
-    
-    // ==========================================
-    // PLAN ERSTELLEN ODER AKTUALISIEREN
-    // ==========================================
+    const inputData = readPlanInputs();
+    if (!inputData) {
+        return;
+    }
 
-    // Beim Bearbeiten die bestehende ID beibehalten.
-    // Bei einem neuen Plan eine neue ID erzeugen.
-    const plan = {
-        id: editingPlan ? editingPlan.id : crypto.randomUUID(),
-        name: planName,
-        exercises: exerciseNames
-    };
+    savePlanButton.disabled = true;
 
     try {
+        const plan = {
+            id: editingPlan ? editingPlan.id : createPlanId(),
+            name: inputData.name,
+            exercises: inputData.exercises
+        };
 
         if (editingPlan) {
-
-            // Vorhandenen Trainingsplan aktualisieren
             updatePlanInStorage(plan);
-
         } else {
-
-            // Neuen Trainingsplan erstellen
             savePlanToStorage(plan);
         }
 
+        // Bisheriges Verhalten: Nach dem Speichern zur Startseite.
+        window.location.href = "index.html";
     } catch (error) {
-        console.error("Fehler beim Speichern:", error);
-        status.textContent =
-            "Trainingsplan konnte nicht gespeichert werden.";
-        return;
+        console.error("Trainingsplan konnte nicht gespeichert werden:", error);
+        showPlanStatus("Trainingsplan konnte nicht gespeichert werden. Bitte versuche es erneut.", true);
+        savePlanButton.disabled = false;
     }
-
-
-    // Nach erfolgreicher Speicherung zur Startseite wechseln
-    window.location.href = "index.html";
 }
 
-
-// ==========================================
-// EVENT: TRAININGSPLAN SPEICHERN
-// ==========================================
-
-document.getElementById("save-plan")
-    .addEventListener("click", savePlan);
+savePlanButton.addEventListener("click", savePlan);
 
 
 // ==========================================
-// TRAININGSPLAN ZUM BEARBEITEN LADEN
+// VORHANDENEN TRAININGSPLAN BEARBEITEN
 // ==========================================
-
-// ID aus der URL auslesen
-const urlParams = new URLSearchParams(window.location.search);
-const editPlanId = urlParams.get("edit");
-
-// Enthält den Plan, der gerade bearbeitet wird
-let editingPlan = null;
-
 
 function loadPlanForEditing() {
-
-    // Ohne edit-Parameter bleibt die Seite im Erstellungsmodus
-    if (!editPlanId) {
+    // Ohne Bearbeitungs-ID beginnen wir mit einem leeren Übungsfeld.
+    if (editPlanId === null) {
+        addPlanExercise();
         return;
     }
 
     try {
-        // Gespeicherte Pläne laden und den passenden suchen
         const plans = loadPlans();
+        const plan = plans.find(item => item && item.id === editPlanId);
 
-        editingPlan = plans.find(function(plan) {
-            return plan.id === editPlanId;
-        });
-
-        if (!editingPlan) {
-            throw new Error("Trainingsplan nicht gefunden.");
+        if (!plan ||
+            typeof plan.name !== "string" || !plan.name.trim() ||
+            !Array.isArray(plan.exercises) ||
+            plan.exercises.length === 0 ||
+            !plan.exercises.every(
+                name => typeof name === "string" && name.trim()
+            )) {
+            throw new Error("Trainingsplan nicht gefunden oder beschädigt.");
         }
 
-        // Seitentitel anpassen
-        document.querySelector("h1").textContent =
-            "Trainingsplan bearbeiten";
+        editingPlan = plan;
+        planNameInput.value = plan.name;
 
-        // Bestehenden Namen einsetzen
-        document.getElementById("plan-name").value =
-            editingPlan.name;
-
-        // Das anfängliche leere Übungsfeld entfernen
+        // Jede gespeicherte Übung mit dem richtigen Namen anzeigen.
         planExercises.replaceChildren();
-
-        // Gespeicherte Übungen wieder als Eingabefelder erstellen
-        for (const exerciseName of editingPlan.exercises) {
-
-            addPlanExercise();
-
-            // Zuletzt hinzugefügtes Eingabefeld auswählen
-            const inputs = planExercises.querySelectorAll("input");
-            const lastInput = inputs[inputs.length - 1];
-
-            lastInput.value = exerciseName;
+        for (const name of plan.exercises) {
+            addPlanExercise(name);
         }
 
-        // Text des Speichern-Buttons anpassen
-        document.getElementById("save-plan").textContent =
-            "Änderungen speichern";
+        const heading = document.querySelector(".plan-create-header h1");
+        if (heading) {
+            heading.textContent = "Trainingsplan bearbeiten";
+        }
 
+        document.title = "Trainingsplan bearbeiten – Gym Tracker";
+        savePlanButton.textContent = "Änderungen speichern";
+        clearPlanStatus();
     } catch (error) {
-        console.error("Fehler beim Laden des Trainingsplans:", error);
-
-        document.getElementById("plan-status").textContent =
-            "Trainingsplan konnte nicht geladen werden.";
-
-        // Verhindern, dass ein nicht gefundener Plan gespeichert wird
-        document.getElementById("save-plan").disabled = true;
+        console.error("Trainingsplan konnte nicht geladen werden:", error);
+        savePlanButton.disabled = true;
+        addExerciseButton.disabled = true;
+        showPlanStatus(
+            "Dieser Trainingsplan konnte nicht geladen werden. Bitte öffne ihn erneut über die Startseite.",
+            true
+        );
     }
 }
 
+// ==========================================
+// SEITE STARTEN
+// ==========================================
 
-// Beim Öffnen prüfen, ob ein Trainingsplan bearbeitet wird
 loadPlanForEditing();

@@ -1,1400 +1,700 @@
-
 // ==========================================
-// GYM TRACKER - JAVASCRIPT
+// GYM TRACKER – TRAINING ERFASSEN
 // ==========================================
+// Kompatibel mit storage.js und den bisherigen Einzel-/Gruppentrainings.
 
-// Container für unsere Übungen
 const exercises = document.getElementById("exercises");
+const friendNames = document.getElementById("friend-names");
+const friendCount = document.getElementById("friend-count");
+const friendsSection = document.getElementById("friends-section");
+const personTabs = document.getElementById("person-tabs");
+const trainingModeInputs = document.querySelectorAll('input[name="training-mode"]');
+const confirmParticipantsButton = document.getElementById("confirm-participants");
+const participantsStatus = document.getElementById("participants-status");
+const saveWorkoutButton = document.getElementById("save-workout");
+const newWorkoutButton = document.getElementById("new-workout");
 
-// Zähler für die Anzahl der Übungen
+// Jede Person erhält einen stabilen internen Schlüssel. Ein Umbenennen
+// verändert dadurch nicht ihre bereits eingetragenen Übungen.
+const participantWorkouts = Object.create(null);
+let activePerson = "Ich";
+let participantsLocked = false;
+let workoutCompleted = false;
+let restoringDraft = false;
 let exerciseCount = 0;
+let uniqueSetId = 0;
+let draftTimer = null;
 
+const selectedPlanId = new URLSearchParams(window.location.search).get("plan");
+const currentDraftKey = "gym-tracker-draft-v2:" +
+    (selectedPlanId ? `plan:${selectedPlanId}` : "free");
 
+// Auch bei lokalen Tests ohne crypto.randomUUID eindeutige IDs erzeugen.
+function createWorkoutId() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+    }
+    return `workout-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function selectedTrainingMode() {
+    return document.querySelector('input[name="training-mode"]:checked').value;
+}
+
+function showSaveStatus(message, isError = false) {
+    const status = document.getElementById("save-status");
+    status.textContent = message;
+    status.style.color = isError ? "var(--color-danger)" : "var(--color-success)";
+}
+
+function showDraftStatus(message) {
+    document.getElementById("draft-status").textContent = message;
+}
+
+function updateSavedCount() {
+    try {
+        document.getElementById("saved-count").textContent =
+            `Gespeicherte Trainings: ${loadWorkouts().length}`;
+    } catch (error) {
+        console.error("Trainings konnten nicht gezählt werden:", error);
+        showSaveStatus("Gespeicherte Trainings konnten nicht geladen werden.", true);
+    }
+}
 
 // ==========================================
-// FUNKTION: NEUEN SATZ ERSTELLEN
+// ÜBUNGEN UND SÄTZE
 // ==========================================
 
 function createSet(exerciseNumber, setNumber) {
-
-    // Neuen Bereich für einen Satz erstellen
+    // Die ID bleibt auch nach dem Löschen mittlerer Sätze eindeutig.
+    const id = `${exerciseNumber}-${++uniqueSetId}`;
     const set = document.createElement("div");
     set.className = "set";
-
-    // Satznummer, Eingabefelder und Entfernen-Button
     set.innerHTML = `
-
-        <!-- Kopfzeile mit Satznummer und Löschen-Button -->
         <div class="set-header">
-
             <h4>Satz ${setNumber}</h4>
-
-            <button type="button" class="remove-set">
-                Entfernen
-            </button>
-
+            <button type="button" class="remove-set">Entfernen</button>
         </div>
-
-        <!-- Gewicht und Wiederholungen nebeneinander -->
         <div class="set-inputs">
-
             <div class="set-field">
-
-                <label for="weight-${exerciseNumber}-${setNumber}">
-                    Gewicht (kg)
-                </label>
-
-                <input type="number"
-                       id="weight-${exerciseNumber}-${setNumber}"
-                       min="0"
-                       step="0.5"
-                       inputmode="decimal"
-                       placeholder="0">
-
+                <label for="weight-${id}">Gewicht (kg)</label>
+                <input type="number" id="weight-${id}" min="0"
+                       step="0.5" inputmode="decimal" placeholder="0">
             </div>
-
             <div class="set-field">
-
-                <label for="reps-${exerciseNumber}-${setNumber}">
-                    Wiederholungen
-                </label>
-
-                <input type="number"
-                       id="reps-${exerciseNumber}-${setNumber}"
-                       min="1"
-                       step="1"
-                       inputmode="numeric"
-                       placeholder="0">
-
+                <label for="reps-${id}">Wiederholungen</label>
+                <input type="number" id="reps-${id}" min="1"
+                       step="1" inputmode="numeric" placeholder="0">
             </div>
-
-        </div>
-    `;
-
+        </div>`;
     return set;
 }
 
-
-// ==========================================
-// FUNKTION: NEUE ÜBUNG HINZUFÜGEN
-// ==========================================
-
 function addExercise() {
-
-    // Anzahl der Übungen erhöhen
-    exerciseCount ++ ;
-
-    // Neuen HTML-Bereich für die Übung erstellen
+    exerciseCount++;
     const exercise = document.createElement("fieldset");
     exercise.className = "exercise";
-
-    // Übungsnummer speichern
-    exercise.dataset.number = exerciseCount;
-
-    // Inhalt der neuen Übung
+    exercise.dataset.number = String(exerciseCount);
     exercise.innerHTML = `
         <legend>Übung ${exerciseCount}</legend>
-        <!-- Entfernt die gesamte Übung -->
-        <button type="button" class="remove-exercise">
-            Übung entfernen
-        </button>
-
-        <label for="exercise-${exerciseCount}">
-            Name:
-        </label>
-        
-        <!-- Eingabefeld mit automatischen Übungsvorschlägen -->
-        <input type="text"
-            id="exercise-${exerciseCount}"
-            list="exercise-suggestions"
-            autocomplete="off"
-            placeholder="Übung suchen oder eingeben">
-
-
+        <button type="button" class="remove-exercise">Übung entfernen</button>
+        <label for="exercise-${exerciseCount}">Name:</label>
+        <input type="text" id="exercise-${exerciseCount}"
+               list="exercise-suggestions" autocomplete="off"
+               placeholder="Übung suchen oder eingeben">
         <div class="sets"></div>
+        <button type="button" class="add-set">+ Satz hinzufügen</button>`;
 
-        <button type="button" class="add-set">
-            + Satz hinzufügen
-        </button>
-    `;
-    
-    // Bereich für die zuletzt gespeicherten Trainingswerte
+    const nameInput = exercise.querySelector('input[type="text"]');
     const lastWorkoutInfo = document.createElement("div");
     lastWorkoutInfo.className = "last-workout-info";
-
-    // Direkt nach dem Übungsnamen einfügen
-    const exerciseNameInput = exercise.querySelector('input[type="text"]');
-    exerciseNameInput.after(lastWorkoutInfo);
-
-    // Bei jeder Änderung des Übungsnamens nach alten Werten suchen
-    exerciseNameInput.addEventListener("input", function() {
-        showLastExercise(exerciseNameInput.value, lastWorkoutInfo);
+    nameInput.after(lastWorkoutInfo);
+    nameInput.addEventListener("input", function() {
+        showLastExercise(nameInput.value, lastWorkoutInfo);
     });
 
-    // Übung in unsere Webseite einfügen
+    exercise.querySelector(".sets").appendChild(createSet(exerciseCount, 1));
     exercises.appendChild(exercise);
-
-    // Jede neue Übung bekommt automatisch einen ersten Satz
-    exercise.querySelector(".sets").appendChild(
-        createSet(exerciseCount, 1)
-    );
+    return exercise;
 }
 
+function updateSetNumbers(exercise) {
+    exercise.querySelectorAll(".set").forEach(function(set, index) {
+        set.querySelector(".set-header h4").textContent = `Satz ${index + 1}`;
+    });
+}
 
-// ==========================================
-// EVENT: ÜBUNG HINZUFÜGEN
-// ==========================================
+function updateExerciseNumbers() {
+    exercises.querySelectorAll(".exercise").forEach(function(exercise, index) {
+        exercise.querySelector("legend").textContent = `Übung ${index + 1}`;
+    });
+}
 
-// Wird ausgeführt, wenn der Button geklickt wird
-document.getElementById("add-exercise")
-    .addEventListener("click", addExercise);
+function readVisibleExercises() {
+    return [...exercises.querySelectorAll(".exercise")].map(function(exercise) {
+        return {
+            name: exercise.querySelector('input[type="text"]').value,
+            sets: [...exercise.querySelectorAll(".set")].map(function(set) {
+                return {
+                    weight: set.querySelector('input[id^="weight-"]').value,
+                    reps: set.querySelector('input[id^="reps-"]').value
+                };
+            })
+        };
+    });
+}
 
+function rememberCurrentPerson() {
+    participantWorkouts[activePerson] = readVisibleExercises();
+}
 
-// ==========================================
-// EVENT: SATZ HINZUFÜGEN
-// ==========================================
+function renderPersonExercises(personKey) {
+    const savedExercises = participantWorkouts[personKey];
+    exercises.replaceChildren();
+    exerciseCount = 0;
 
-exercises.addEventListener("click", function(event) {
+    if (!Array.isArray(savedExercises) || savedExercises.length === 0) {
+        addExercise();
+    } else {
+        savedExercises.forEach(function(savedExercise) {
+            const exercise = addExercise();
+            const nameInput = exercise.querySelector('input[type="text"]');
+            nameInput.value = savedExercise.name || "";
 
-    // Prüfen, ob ein "Satz hinzufügen"-Button geklickt wurde
-    if (!event.target.classList.contains("add-set")) {
-        return;
-    }
-
-    // Die Übung finden, zu der der Button gehört
-    const exercise = event.target.closest(".exercise");
-
-    // Satz-Container dieser Übung finden
-    const sets = exercise.querySelector(".sets");
-
-    // Neue Satznummer berechnen
-    const nextSet = sets.querySelectorAll(".set").length + 1;
-
-    // Übungsnummer auslesen
-    const number = exercise.dataset.number;
-
-    // Neuen Satz bei der richtigen Übung einfügen
-    sets.appendChild(createSet(number, nextSet));
-});
-
-
-// ==========================================
-// APP STARTEN
-// ==========================================
-
-// Beim Öffnen automatisch die erste Übung anzeigen
-addExercise();
-
-
-function saveWorkout() {
-    // Prüfen, ob die Teilnehmer bestätigt wurden
-    if (!participantsLocked) {
-
-        showSaveStatus(
-            "Bitte bestätige zuerst die Teilnehmer.",
-            true
-        );
-
-        return;
-    }
-    // Aktuell sichtbare Eingaben ebenfalls übernehmen
-    savePersonInputs();
-
-    // Prüfen, ob alleine oder mit Freunden trainiert wird
-    const mode = document.querySelector(
-        'input[name="training-mode"]:checked'
-    ).value;
-
-    // Teilnehmerliste zusammenstellen
-    const participants = ["Ich"];
-
-    if (mode === "friends") {
-
-        const names = [...friendNames.querySelectorAll("input")]
-            .map(input => input.value.trim());
-
-        // Jeder Freund benötigt einen Namen
-        if (names.some(name => name === "")) {
-            showSaveStatus("Bitte gib alle Freundesnamen ein.", true);
-            return;
-        }
-
-        // Namen müssen eindeutig sein
-        const normalizedNames = ["ich", ...names.map(
-            name => name.toLowerCase()
-        )];
-
-        if (new Set(normalizedNames).size !== normalizedNames.length) {
-            showSaveStatus("Bitte verwende unterschiedliche Namen.", true);
-            return;
-        }
-
-        participants.push(...names);
-    }
-
-    // Hier sammeln wir die fertigen Teilnehmerdaten
-    const participantsData = [];
-
-    // Jede Person einzeln verarbeiten
-    for (const person of participants) {
-
-        const personExercises = participantWorkouts[person] || [];
-
-        // Mindestens eine Übung erforderlich
-        if (personExercises.length === 0) {
-            showSaveStatus(
-                `Bitte füge für ${person} mindestens eine Übung hinzu.`,
-                true
-            );
-            return;
-        }
-
-        const exercisesData = [];
-
-        for (const exercise of personExercises) {
-
-            const name = exercise.name.trim();
-
-            if (name === "") {
-                showSaveStatus(
-                    `Bitte gib für ${person} alle Übungsnamen ein.`,
-                    true
-                );
-                return;
-            }
-
-            if (exercise.sets.length === 0) {
-                showSaveStatus(
-                    `${person}: Jede Übung benötigt mindestens einen Satz.`,
-                    true
-                );
-                return;
-            }
-
-            const setsData = [];
-
-            for (const set of exercise.sets) {
-
-                const weight = Number(set.weight);
-                const reps = Number(set.reps);
-
-                // Ungültige Eingaben verhindern
-                if (
-                    set.weight === "" ||
-                    set.reps === "" ||
-                    !Number.isFinite(weight) ||
-                    weight < 0 ||
-                    !Number.isInteger(reps) ||
-                    reps < 1
-                ) {
-                    showSaveStatus(
-                        `Bitte überprüfe die Trainingswerte von ${person}.`,
-                        true
-                    );
-                    return;
+            const sets = exercise.querySelector(".sets");
+            sets.replaceChildren();
+            (Array.isArray(savedExercise.sets) ? savedExercise.sets : []).forEach(
+                function(savedSet, index) {
+                    const set = createSet(exercise.dataset.number, index + 1);
+                    set.querySelector('input[id^="weight-"]').value = savedSet.weight ?? "";
+                    set.querySelector('input[id^="reps-"]').value = savedSet.reps ?? "";
+                    sets.appendChild(set);
                 }
-
-                setsData.push({
-                    weight: weight,
-                    reps: reps
-                });
-            }
-
-            exercisesData.push({
-                name: name,
-                sets: setsData
-            });
-        }
-
-        // Übungen eindeutig einer Person zuordnen
-        participantsData.push({
-            name: person,
-            exercises: exercisesData
+            );
+            showLastExercise(nameInput.value, exercise.querySelector(".last-workout-info"));
         });
     }
+    if (workoutCompleted) {
+        disableCompletedInputs();
+    }
+}
 
-    // Ein gemeinsames Training erstellen
+function disableCompletedInputs() {
+    exercises.querySelectorAll("input, button").forEach(function(element) {
+        element.disabled = true;
+    });
+    document.getElementById("add-exercise").disabled = true;
+}
+
+// ==========================================
+// TEILNEHMER – STABILE PLÄTZE STATT NAMENS-KEYS
+// ==========================================
+
+function listParticipants() {
+    const people = [{ key: "Ich", name: "Ich" }];
+    if (selectedTrainingMode() === "friends") {
+        [...friendNames.querySelectorAll("input")].forEach(function(input, index) {
+            people.push({
+                key: `friend-${index}`,
+                name: input.value.trim() || `Freund ${index + 1}`
+            });
+        });
+    }
+    return people;
+}
+
+function currentPersonName() {
+    return listParticipants().find(person => person.key === activePerson)?.name || "Ich";
+}
+
+function updatePersonTabs() {
+    const people = listParticipants();
+    if (!people.some(person => person.key === activePerson)) {
+        activePerson = "Ich";
+        renderPersonExercises(activePerson);
+    }
+
+    personTabs.replaceChildren();
+    people.forEach(function(person) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "person-tab";
+        button.textContent = person.name;
+        if (person.key === activePerson) {
+            button.classList.add("active");
+            button.setAttribute("aria-current", "true");
+        }
+        button.addEventListener("click", function() {
+            if (person.key === activePerson) return;
+            if (!workoutCompleted) rememberCurrentPerson();
+            activePerson = person.key;
+            renderPersonExercises(activePerson);
+            updatePersonTabs();
+            scheduleDraftSave();
+        });
+        personTabs.appendChild(button);
+    });
+}
+
+function updateFriendInputs() {
+    const oldNames = [...friendNames.querySelectorAll("input")].map(input => input.value);
+    const count = Number(friendCount.value);
+    friendNames.replaceChildren();
+
+    for (let i = 0; i < count; i++) {
+        const field = document.createElement("div");
+        field.className = "friend-field";
+        const label = document.createElement("label");
+        label.htmlFor = `friend-${i}`;
+        label.textContent = `Name von Freund ${i + 1}`;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `friend-${i}`;
+        input.placeholder = `Freund ${i + 1}`;
+        input.value = oldNames[i] || "";
+        field.append(label, input);
+        friendNames.appendChild(field);
+    }
+    updatePersonTabs();
+}
+
+function updateTrainingMode() {
+    friendsSection.hidden = selectedTrainingMode() !== "friends";
+    if (selectedTrainingMode() === "friends" && !friendNames.querySelector("input")) {
+        updateFriendInputs();
+    }
+    updatePersonTabs();
+}
+
+function validateParticipantNames() {
+    if (selectedTrainingMode() !== "friends") return true;
+
+    const names = [...friendNames.querySelectorAll("input")].map(input => input.value.trim());
+    if (names.some(name => !name)) {
+        participantsStatus.textContent = "Bitte gib zuerst alle Freundesnamen ein.";
+        return false;
+    }
+    const normalized = ["ich", ...names.map(name => name.toLocaleLowerCase("de-DE"))];
+    if (new Set(normalized).size !== normalized.length) {
+        participantsStatus.textContent = "Bitte verwende unterschiedliche Namen.";
+        return false;
+    }
+    return true;
+}
+
+function lockParticipants(saveDraft = true) {
+    if (!validateParticipantNames()) return false;
+    participantsLocked = true;
+    trainingModeInputs.forEach(input => { input.disabled = true; });
+    friendCount.disabled = true;
+    friendNames.querySelectorAll("input").forEach(input => { input.disabled = true; });
+    confirmParticipantsButton.disabled = true;
+    confirmParticipantsButton.textContent = "Teilnehmer bestätigt ✓";
+    participantsStatus.textContent = "Teilnehmer festgelegt. Du kannst jetzt trainieren.";
+    updatePersonTabs();
+    if (saveDraft) persistDraft();
+    return true;
+}
+
+// ==========================================
+// LETZTE TRAININGSWERTE UND ÜBUNGSVORSCHLÄGE
+// ==========================================
+
+function showLastExercise(exerciseName, container) {
+    container.replaceChildren();
+    const searchName = (exerciseName || "").trim().toLocaleLowerCase("de-DE");
+    if (!searchName) return;
+
+    let workouts;
+    try {
+        workouts = loadWorkouts();
+    } catch (error) {
+        console.error("Letzte Trainingswerte konnten nicht geladen werden:", error);
+        container.textContent = "Letzte Trainingswerte konnten nicht geladen werden.";
+        return;
+    }
+
+    const personName = currentPersonName();
+    const sorted = [...workouts].sort((a, b) => new Date(b.date) - new Date(a.date));
+    for (const workout of sorted) {
+        let personExercises;
+        if (Array.isArray(workout.participants)) {
+            const person = workout.participants.find(item => item.name === personName);
+            if (!person) continue;
+            personExercises = person.exercises || [];
+        } else {
+            if (personName !== "Ich") continue;
+            personExercises = workout.exercises || [];
+        }
+        const found = personExercises.find(item =>
+            item.name.trim().toLocaleLowerCase("de-DE") === searchName
+        );
+        if (!found) continue;
+
+        const heading = document.createElement("h4");
+        heading.textContent = "Letztes Training";
+        const date = document.createElement("p");
+        date.textContent = new Date(workout.date).toLocaleDateString("de-DE");
+        container.append(heading, date);
+        found.sets.forEach(function(set, index) {
+            const info = document.createElement("p");
+            info.textContent = `Satz ${index + 1}: ${set.weight} kg × ${set.reps} Wiederholungen`;
+            container.appendChild(info);
+        });
+        return;
+    }
+    container.textContent = "Noch keine Trainingswerte für diese Person und Übung vorhanden.";
+}
+
+function loadExerciseSuggestions() {
+    const datalist = document.getElementById("exercise-suggestions");
+    datalist.replaceChildren();
+    try {
+        const names = new Map();
+        const collect = function(items) {
+            for (const exercise of items || []) {
+                if (!exercise || typeof exercise.name !== "string") continue;
+                const name = exercise.name.trim();
+                if (name && !names.has(name.toLocaleLowerCase("de-DE"))) {
+                    names.set(name.toLocaleLowerCase("de-DE"), name);
+                }
+            }
+        };
+        for (const workout of loadWorkouts()) {
+            if (Array.isArray(workout.participants)) {
+                workout.participants.forEach(person => collect(person.exercises));
+            } else {
+                collect(workout.exercises);
+            }
+        }
+        [...names.values()].sort((a, b) => a.localeCompare(b, "de"))
+            .forEach(function(name) {
+                const option = document.createElement("option");
+                option.value = name;
+                datalist.appendChild(option);
+            });
+    } catch (error) {
+        console.error("Übungsvorschläge konnten nicht geladen werden:", error);
+    }
+}
+
+function loadSelectedPlan() {
+    if (!selectedPlanId) return;
+    try {
+        const plan = loadPlans().find(item => item.id === selectedPlanId);
+        if (!plan) throw new Error("Trainingsplan wurde nicht gefunden.");
+
+        participantWorkouts.Ich = plan.exercises.map(name => ({
+            name,
+            sets: [{ weight: "", reps: "" }]
+        }));
+        renderPersonExercises("Ich");
+        // Im alten Code wurde versehentlich „Wer trainiert heute?“ geändert.
+        document.querySelector(".training-intro h1").textContent =
+            `Neues Training – ${plan.name}`;
+    } catch (error) {
+        console.error("Trainingsplan konnte nicht geladen werden:", error);
+        showSaveStatus(error.message, true);
+    }
+}
+
+// ==========================================
+// ENTWÜRFE PRO TRAININGSPLAN GETRENNT SICHERN
+// ==========================================
+
+function collectWorkoutDraft() {
+    rememberCurrentPerson();
+    return {
+        schema: 2,
+        planId: selectedPlanId,
+        participantsLocked,
+        activePerson,
+        mode: selectedTrainingMode(),
+        friendNames: [...friendNames.querySelectorAll("input")].map(input => input.value),
+        friendCount: Number(friendCount.value),
+        participantWorkouts: structuredClone(participantWorkouts),
+        exercises: readVisibleExercises()
+    };
+}
+
+function persistDraft() {
+    if (restoringDraft || workoutCompleted) return;
+    clearTimeout(draftTimer);
+    draftTimer = null;
+    try {
+        localStorage.setItem(currentDraftKey, JSON.stringify(collectWorkoutDraft()));
+        showDraftStatus("Automatisch zwischengespeichert");
+    } catch (error) {
+        console.error("Zwischenspeicherung fehlgeschlagen:", error);
+        showDraftStatus("Zwischenspeicherung fehlgeschlagen");
+    }
+}
+
+function scheduleDraftSave() {
+    if (restoringDraft || workoutCompleted) return;
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(persistDraft, 250);
+}
+
+function clearCurrentDraft() {
+    clearTimeout(draftTimer);
+    draftTimer = null;
+    localStorage.removeItem(currentDraftKey);
+    // Ggf. verbliebenen alten Entwurf nur für denselben Kontext löschen.
+    try {
+        const legacy = loadWorkoutDraft();
+        if (legacy && (legacy.planId || null) === selectedPlanId) {
+            clearWorkoutDraft();
+        }
+    } catch (error) {
+        console.warn("Alter Entwurf konnte nicht gelesen werden:", error);
+    }
+}
+
+function readCurrentDraft() {
+    const saved = localStorage.getItem(currentDraftKey);
+    if (saved !== null) {
+        const draft = JSON.parse(saved);
+        if (!draft || !Array.isArray(draft.exercises)) {
+            throw new Error("Gespeicherter Trainingsentwurf ist ungültig.");
+        }
+        return draft;
+    }
+
+    // Vorhandene Entwürfe aus der vorherigen App-Version nicht verlieren.
+    const legacy = loadWorkoutDraft();
+    if (!legacy || (legacy.planId || null) !== selectedPlanId) return null;
+    localStorage.setItem(currentDraftKey, JSON.stringify(legacy));
+    clearWorkoutDraft();
+    return legacy;
+}
+
+function normalizeLegacyDraft(draft) {
+    if (draft.schema === 2) return draft;
+    const names = Array.isArray(draft.friendNames) ? draft.friendNames : [];
+    const data = Object.create(null);
+    const oldData = draft.participantWorkouts || {};
+    data.Ich = Array.isArray(oldData.Ich) ? oldData.Ich : [];
+    names.forEach(function(name, index) {
+        const key = `friend-${index}`;
+        if (Object.prototype.hasOwnProperty.call(oldData, name)) {
+            data[key] = oldData[name];
+        }
+    });
+    const person = names.findIndex(name => name === draft.activePerson);
+    const activeKey = person === -1 ? "Ich" : `friend-${person}`;
+    data[activeKey] = draft.exercises;
+    return { ...draft, schema: 2, activePerson: activeKey, participantWorkouts: data };
+}
+
+function restoreWorkoutDraft() {
+    let draft;
+    try {
+        draft = readCurrentDraft();
+    } catch (error) {
+        console.error("Entwurf konnte nicht gelesen werden:", error);
+        showDraftStatus("Gespeicherter Entwurf konnte nicht geladen werden.");
+        return;
+    }
+    if (!draft) return;
+
+    restoringDraft = true;
+    try {
+        draft = normalizeLegacyDraft(draft);
+        const savedMode = draft.mode === "friends" ? "friends" : "solo";
+        document.querySelector(`input[name="training-mode"][value="${savedMode}"]`).checked = true;
+
+        if (savedMode === "friends") {
+            const names = Array.isArray(draft.friendNames) ? draft.friendNames : [];
+            const count = Math.max(1, Math.min(5, Number(draft.friendCount) || names.length || 1));
+            friendCount.value = String(count);
+            updateFriendInputs();
+            [...friendNames.querySelectorAll("input")].forEach(function(input, index) {
+                input.value = names[index] || "";
+            });
+        }
+        updateTrainingMode();
+
+        Object.keys(participantWorkouts).forEach(key => { delete participantWorkouts[key]; });
+        for (const [key, value] of Object.entries(draft.participantWorkouts || {})) {
+            if (Array.isArray(value)) participantWorkouts[key] = value;
+        }
+        activePerson = draft.activePerson || "Ich";
+        if (!listParticipants().some(person => person.key === activePerson)) {
+            activePerson = "Ich";
+        }
+        participantWorkouts[activePerson] = draft.exercises;
+        renderPersonExercises(activePerson);
+        updatePersonTabs();
+
+        if (draft.participantsLocked === true) lockParticipants(false);
+        showDraftStatus("Laufendes Training wiederhergestellt");
+    } catch (error) {
+        console.error("Fehler beim Wiederherstellen:", error);
+        showDraftStatus("Entwurf konnte nicht vollständig wiederhergestellt werden.");
+    } finally {
+        restoringDraft = false;
+    }
+}
+
+// ==========================================
+// TRAINING ABSCHLIESSEN
+// ==========================================
+
+function saveWorkout() {
+    if (workoutCompleted) return;
+    if (!participantsLocked) {
+        showSaveStatus("Bitte bestätige zuerst die Teilnehmer.", true);
+        return;
+    }
+    if (!validateParticipantNames()) {
+        showSaveStatus("Bitte überprüfe die Teilnehmernamen.", true);
+        return;
+    }
+
+    rememberCurrentPerson();
+    const people = listParticipants();
+    const participants = [];
+
+    for (const person of people) {
+        const savedExercises = participantWorkouts[person.key];
+        if (!Array.isArray(savedExercises) || savedExercises.length === 0) {
+            showSaveStatus(`Bitte füge für ${person.name} mindestens eine Übung hinzu.`, true);
+            return;
+        }
+        const cleanExercises = [];
+        for (const exercise of savedExercises) {
+            const name = typeof exercise.name === "string" ? exercise.name.trim() : "";
+            if (!name) {
+                showSaveStatus(`Bitte gib für ${person.name} alle Übungsnamen ein.`, true);
+                return;
+            }
+            if (!Array.isArray(exercise.sets) || exercise.sets.length === 0) {
+                showSaveStatus(`${person.name}: Jede Übung benötigt mindestens einen Satz.`, true);
+                return;
+            }
+            const cleanSets = [];
+            for (const set of exercise.sets) {
+                const weight = Number(set.weight);
+                const reps = Number(set.reps);
+                if (set.weight === "" || set.reps === "" ||
+                    !Number.isFinite(weight) || weight < 0 ||
+                    !Number.isInteger(reps) || reps < 1) {
+                    showSaveStatus(`Bitte überprüfe die Trainingswerte von ${person.name}.`, true);
+                    return;
+                }
+                cleanSets.push({ weight, reps });
+            }
+            cleanExercises.push({ name, sets: cleanSets });
+        }
+        participants.push({ name: person.name, exercises: cleanExercises });
+    }
+
     const workout = {
-        id: crypto.randomUUID(),
+        id: createWorkoutId(),
         date: new Date().toISOString(),
-
-        // Einzeltraining bleibt mit der alten Struktur kompatibel
-        ...(mode === "solo"
-            ? { exercises: participantsData[0].exercises }
-            : { participants: participantsData })
+        ...(selectedTrainingMode() === "solo"
+            ? { exercises: participants[0].exercises }
+            : { participants })
     };
 
-    // Training dauerhaft speichern
     try {
         saveWorkoutToStorage(workout);
     } catch (error) {
-        console.error("Fehler beim Speichern:", error);
+        console.error("Training konnte nicht gespeichert werden:", error);
         showSaveStatus("Training konnte nicht gespeichert werden.", true);
         return;
     }
 
-    // Erfolgreich abgeschlossenen Entwurf entfernen
+    // Ab jetzt darf kein Klick einen neuen Entwurf dieses Trainings erzeugen.
+    workoutCompleted = true;
     try {
-        clearWorkoutDraft();
+        clearCurrentDraft();
         showDraftStatus("Training abgeschlossen");
     } catch (error) {
         console.error("Entwurf konnte nicht entfernt werden:", error);
+        showDraftStatus("Training gespeichert, alter Entwurf konnte nicht entfernt werden.");
     }
 
-    showSaveStatus("Training erfolgreich gespeichert!");
-    // ==========================================
-    // DOPPELTES SPEICHERN VERHINDERN
-    // ==========================================
-
-    // Speichern-Button nach erfolgreichem Speichern deaktivieren
-    const saveButton = document.getElementById("save-workout");
-
-    saveButton.disabled = true;
-    saveButton.textContent = "Training abgeschlossen ✓";
-    // Button für ein neues Training sichtbar machen
-    const newWorkoutButton = document.getElementById("new-workout");
+    saveWorkoutButton.disabled = true;
+    saveWorkoutButton.textContent = "Training abgeschlossen ✓";
     newWorkoutButton.hidden = false;
+    disableCompletedInputs();
+    showSaveStatus("Training erfolgreich gespeichert!");
     updateSavedCount();
     loadExerciseSuggestions();
 }
 
 // ==========================================
-// FUNKTION: STATUSMELDUNG ANZEIGEN
+// BEDIENELEMENTE UND START
 // ==========================================
 
-function showSaveStatus(message, isError = false) {
-
-    const status = document.getElementById("save-status");
-
-    // Meldung in der Webseite anzeigen
-    status.textContent = message;
-
-    // Fehler rot, erfolgreiche Speicherung grün darstellen
-    status.style.color = isError ? "red" : "green";
-}
-
-
-// ==========================================
-// FUNKTION: GESPEICHERTE TRAININGS ZÄHLEN
-// ==========================================
-
-function updateSavedCount() {
-
-    try {
-        // Bereits gespeicherte Trainings abrufen
-        const workouts = loadWorkouts();
-
-        // Anzahl der gespeicherten Trainings anzeigen
-        document.getElementById("saved-count").textContent =
-            `Gespeicherte Trainings: ${workouts.length}`;
-
-    } catch (error) {
-        console.error("Fehler beim Laden:", error);
-        showSaveStatus(
-            "Gespeicherte Trainings konnten nicht geladen werden.",
-            true
-        );
-    }
-}
-
-
-// ==========================================
-// EVENT: TRAINING SPEICHERN
-// ==========================================
-
-// Beim Klick auf den Button unsere Speicherfunktion ausführen
-document.getElementById("save-workout")
-    .addEventListener("click", saveWorkout);
-
-
-// ==========================================
-// APP INITIALISIEREN
-// ==========================================
-
-// Beim Start gespeicherte Trainings zählen
-updateSavedCount();
-
-function showLastExercise(exerciseName, container) {
-
-    // Bisherige Anzeige entfernen
-    container.replaceChildren();
-
-    const searchName = exerciseName.trim().toLowerCase();
-
-    if (searchName === "") {
-        return;
-    }
-
-    let workouts;
-
-    try {
-        workouts = loadWorkouts();
-    } catch (error) {
-        console.error("Fehler beim Laden:", error);
-        container.textContent =
-            "Letzte Trainingswerte konnten nicht geladen werden.";
-        return;
-    }
-
-    // Aktuell ausgewählte Person bestimmen
-    const personName =
-        typeof activePerson !== "undefined" ? activePerson : "Ich";
-
-    // Neueste Trainings zuerst durchsuchen
-    const sortedWorkouts = [...workouts].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-    );
-
-    for (const workout of sortedWorkouts) {
-
-        let personExercises = [];
-
-        if (Array.isArray(workout.participants)) {
-
-            // Gemeinsames Training:
-            // Nur die Übungen der ausgewählten Person verwenden
-            const person = workout.participants.find(
-                participant => participant.name === personName
-            );
-
-            if (!person) {
-                continue;
-            }
-
-            personExercises = person.exercises || [];
-
-        } else {
-
-            // Alte Einzeltrainings gehören ausschließlich "Ich"
-            if (personName !== "Ich") {
-                continue;
-            }
-
-            personExercises = workout.exercises || [];
-        }
-
-        // Passende Übung suchen
-        const previousExercise = personExercises.find(
-            exercise =>
-                exercise.name.trim().toLowerCase() === searchName
-        );
-
-        if (!previousExercise) {
-            continue;
-        }
-
-        // Überschrift anzeigen
-        const heading = document.createElement("h4");
-        heading.textContent = "Letztes Training";
-        container.appendChild(heading);
-
-        // Trainingsdatum anzeigen
-        const date = document.createElement("p");
-        date.textContent = new Date(workout.date)
-            .toLocaleDateString("de-DE");
-
-        container.appendChild(date);
-
-        // Sätze anzeigen
-        previousExercise.sets.forEach(function(set, index) {
-
-            const setInfo = document.createElement("p");
-
-            setInfo.textContent =
-                `Satz ${index + 1}: ${set.weight} kg × ${set.reps} Wiederholungen`;
-
-            container.appendChild(setInfo);
-        });
-
-        return;
-    }
-
-    container.textContent =
-        "Noch keine Trainingswerte für diese Person und Übung vorhanden.";
-}
-
-// ==========================================
-// FUNKTION: SATZNUMMERN AKTUALISIEREN
-// ==========================================
-
-function updateSetNumbers(exercise) {
-
-    // Alle vorhandenen Sätze der Übung finden
-    const sets = exercise.querySelectorAll(".set");
-
-    // Sätze von 1 an neu durchnummerieren
-    sets.forEach(function(set, index) {
-
-        // Neue Satznummer (index beginnt bei 0)
-        const number = index + 1;
-
-        // Überschrift aktualisieren
-        set.querySelector("h4").textContent = `Satz ${number}`;
-    });
-}
-
-
-// ==========================================
-// FUNKTION: ÜBUNGSNUMMERN AKTUALISIEREN
-// ==========================================
-
-function updateExerciseNumbers() {
-
-    // Alle noch vorhandenen Übungen finden
-    const exerciseElements = exercises.querySelectorAll(".exercise");
-
-    exerciseElements.forEach(function(exercise, index) {
-
-        // Sichtbare Übungsnummer aktualisieren
-        exercise.querySelector("legend").textContent =
-            `Übung ${index + 1}`;
-    });
-}
-
-
-// ==========================================
-// EVENT: SATZ ODER ÜBUNG ENTFERNEN
-// ==========================================
+document.getElementById("add-exercise").addEventListener("click", function() {
+    if (workoutCompleted) return;
+    addExercise();
+    scheduleDraftSave();
+});
 
 exercises.addEventListener("click", function(event) {
-
-    // ======================================
-    // SATZ ENTFERNEN
-    // ======================================
-
-    if (event.target.classList.contains("remove-set")) {
-
-        // Den Satz finden, zu dem der Button gehört
-        const set = event.target.closest(".set");
-
-        // Zugehörige Übung finden
+    if (workoutCompleted) return;
+    if (event.target.classList.contains("add-set")) {
         const exercise = event.target.closest(".exercise");
-
-        // Satz aus der Webseite entfernen
-        set.remove();
-
-        // Verbleibende Satznummern aktualisieren
+        const sets = exercise.querySelector(".sets");
+        sets.appendChild(createSet(exercise.dataset.number, sets.children.length + 1));
+        scheduleDraftSave();
+    } else if (event.target.classList.contains("remove-set")) {
+        const exercise = event.target.closest(".exercise");
+        event.target.closest(".set").remove();
         updateSetNumbers(exercise);
-    }
-
-
-    // ======================================
-    // ÜBUNG ENTFERNEN
-    // ======================================
-
-    if (event.target.classList.contains("remove-exercise")) {
-
-        // Die zugehörige Übung finden
-        const exercise = event.target.closest(".exercise");
-
-        // Gesamte Übung entfernen
-        exercise.remove();
-
-        // Verbleibende Übungsnummern aktualisieren
+        scheduleDraftSave();
+    } else if (event.target.classList.contains("remove-exercise")) {
+        event.target.closest(".exercise").remove();
         updateExerciseNumbers();
+        scheduleDraftSave();
     }
 });
 
-// ==========================================
-// ÜBUNGSVORSCHLÄGE LADEN
-// EINZEL- UND GRUPPENTRAININGS
-// ==========================================
-
-function loadExerciseSuggestions() {
-
-    // Vorschlagsliste aus HTML auswählen
-    const datalist =
-        document.getElementById("exercise-suggestions");
-
-    // Alte Vorschläge entfernen
-    datalist.replaceChildren();
-
-    let workouts;
-
-    try {
-        workouts = loadWorkouts();
-    } catch (error) {
-        console.error("Fehler beim Laden:", error);
-        return;
-    }
-
-    // Hier sammeln wir alle Übungsnamen
-    const exerciseNames = new Set();
-
-    // Hilfsfunktion: Übungsnamen einer Liste übernehmen
-    function collectNames(exerciseList) {
-
-        for (const exercise of exerciseList) {
-
-            const name = exercise.name.trim();
-
-            if (name === "") {
-                continue;
-            }
-
-            // Groß-/Kleinschreibung beim Vergleich ignorieren
-            const exists = [...exerciseNames].some(
-                savedName =>
-                    savedName.toLowerCase() === name.toLowerCase()
-            );
-
-            if (!exists) {
-                exerciseNames.add(name);
-            }
-        }
-    }
-
-    // Alle gespeicherten Trainings durchgehen
-    for (const workout of workouts) {
-
-        if (Array.isArray(workout.participants)) {
-
-            // Gemeinsames Training:
-            // Übungen aller Teilnehmer berücksichtigen
-            for (const person of workout.participants) {
-                collectNames(person.exercises || []);
-            }
-
-        } else {
-
-            // Bisheriges Einzeltraining
-            collectNames(workout.exercises || []);
-        }
-    }
-
-    // Übungsnamen alphabetisch sortieren
-    const sortedNames = [...exerciseNames].sort(
-        (a, b) => a.localeCompare(b, "de")
-    );
-
-    // Vorschläge als HTML-Optionen einfügen
-    for (const name of sortedNames) {
-
-        const option = document.createElement("option");
-        option.value = name;
-
-        datalist.appendChild(option);
-    }
-}
-
-// ==========================================
-// VORSCHLÄGE BEIM START LADEN
-// ==========================================
-
-loadExerciseSuggestions();
-
-
-// ==========================================
-// TRAINING AUS EINEM TRAININGSPLAN STARTEN
-// ==========================================
-
-function loadSelectedPlan() {
-
-    // Informationen aus der aktuellen URL auslesen
-    const urlParams = new URLSearchParams(window.location.search);
-
-    // ID des ausgewählten Trainingsplans ermitteln
-    const planId = urlParams.get("plan");
-
-    // Wenn keine Plan-ID vorhanden ist:
-    // normales freies Training beibehalten
-    if (!planId) {
-        return;
-    }
-
-    // Alle gespeicherten Trainingspläne laden
-    let plans;
-
-    try {
-        plans = loadPlans();
-    } catch (error) {
-        console.error("Trainingspläne konnten nicht geladen werden:", error);
-        showSaveStatus("Trainingsplan konnte nicht geladen werden.", true);
-        return;
-    }
-
-    // Passenden Trainingsplan anhand seiner ID suchen
-    const selectedPlan = plans.find(function(plan) {
-        return plan.id === planId;
-    });
-
-    // Prüfen, ob der Trainingsplan existiert
-    if (!selectedPlan) {
-        showSaveStatus("Trainingsplan wurde nicht gefunden.", true);
-        return;
-    }
-
-    // Das bisherige leere Trainingsformular entfernen
-    exercises.replaceChildren();
-    // Übungszähler zurücksetzen
-    exerciseCount = 0;
-    // Für jede Übung des Plans ein Eingabefeld erstellen
-    for (const exerciseName of selectedPlan.exercises) {
-
-        // Unsere bereits vorhandene Funktion verwenden
-        addExercise();
-
-        // Zuletzt hinzugefügte Übung auswählen
-        const exerciseElements = exercises.querySelectorAll(".exercise");
-        const latestExercise = exerciseElements[exerciseElements.length - 1];
-
-        // Namen der Übung automatisch eintragen
-        const nameInput = latestExercise.querySelector('input[type="text"]');
-        nameInput.value = exerciseName;
-
-        // Auch die zuletzt gespeicherten Werte anzeigen
-        const lastWorkoutInfo = latestExercise.querySelector(
-            ".last-workout-info"
-        );
-
-        showLastExercise(exerciseName, lastWorkoutInfo);
-    }
-
-    // Anzeigen, welcher Trainingsplan ausgewählt wurde
-    const heading = document.querySelector("main h2");
-
-    heading.textContent = `Neues Training – ${selectedPlan.name}`;
-}
-
-// ==========================================
-// LAUFENDES TRAINING AUTOMATISCH SICHERN
-// ==========================================
-
-// Statusmeldung für die Zwischenspeicherung
-function showDraftStatus(message) {
-
-    const status = document.getElementById("draft-status");
-
-    if (status) {
-        status.textContent = message;
-    }
-}
-
-function collectWorkoutDraft() {
-
-    const draftExercises = [];
-
-    // Eingaben der aktuell sichtbaren Person sammeln
-    for (const exercise of exercises.querySelectorAll(".exercise")) {
-
-        const name = exercise.querySelector('input[type="text"]').value;
-
-        const sets = [];
-
-        for (const set of exercise.querySelectorAll(".set")) {
-
-            sets.push({
-                weight: set.querySelector('input[id^="weight-"]').value,
-                reps: set.querySelector('input[id^="reps-"]').value
-            });
-        }
-
-        draftExercises.push({
-            name: name,
-            sets: sets
-        });
-    }
-
-    // Wenn die Mehrpersonen-Funktion aktiv ist,
-    // die aktuelle Person ebenfalls aktualisieren.
-    if (typeof activePerson !== "undefined") {
-        participantWorkouts[activePerson] = draftExercises;
-    }
-
-    return {
-        // Zugehörigen Trainingsplan merken
-        planId: new URLSearchParams(window.location.search).get("plan"),
-        // Merken, ob die Teilnehmer bereits bestätigt wurden
-        participantsLocked: participantsLocked,
-        // Aktuell ausgewählte Person merken
-        activePerson: activePerson,
-
-        // Trainingsart merken
-        mode: document.querySelector(
-            'input[name="training-mode"]:checked'
-        ).value,
-
-        // Namen der Freunde merken
-        friendNames: [...friendNames.querySelectorAll("input")]
-            .map(input => input.value),
-
-        // Trainingsdaten aller Personen sichern
-        participantWorkouts: structuredClone(participantWorkouts),
-
-        // Bisheriges Datenfeld für Einzeltrainings beibehalten
-        exercises: draftExercises
-    };
-}
-
-// ==========================================
-// ZWISCHENSPEICHERUNG AUSFÜHREN
-// ==========================================
-
-function autoSaveWorkout() {
-
-    try {
-
-        // Aktuelle Formulardaten sichern
-        const draft = collectWorkoutDraft();
-
-        saveWorkoutDraft(draft);
-
-        showDraftStatus("Automatisch zwischengespeichert");
-
-    } catch (error) {
-
-        console.error("Zwischenspeicherung fehlgeschlagen:", error);
-
-        showDraftStatus("Zwischenspeicherung fehlgeschlagen");
-    }
-}
-
-
-// ==========================================
-// LAUFENDES TRAINING WIEDERHERSTELLEN
-// ==========================================
-
-function restoreWorkoutDraft() {
-
-    let draft;
-
-    try {
-        draft = loadWorkoutDraft();
-    } catch (error) {
-        console.error("Fehler beim Laden:", error);
-        showDraftStatus("Zwischenspeicherung konnte nicht geladen werden");
-        return;
-    }
-
-    // Ohne gespeicherten Entwurf nichts wiederherstellen
-    if (!draft || !Array.isArray(draft.exercises)) {
-        return;
-    }
-
-    // Trainingsplan-ID der aktuellen Seite ermitteln
-    const currentPlanId =
-        new URLSearchParams(window.location.search).get("plan");
-
-    // Entwurf nur beim passenden Trainingsplan laden
-    if ((draft.planId || null) !== currentPlanId) {
-        showDraftStatus("Ein Entwurf eines anderen Trainings ist gespeichert");
-        return;
-    }
-    
-    // ==========================================
-    // TRAININGSART UND FREUNDE WIEDERHERSTELLEN
-    // ==========================================
-
-    // Gespeicherte Trainingsart wieder auswählen
-    const savedMode = draft.mode === "friends" ? "friends" : "solo";
-
-    document.querySelector(
-        `input[name="training-mode"][value="${savedMode}"]`
-    ).checked = true;
-
-    // Gespeicherte Freundesnamen laden
-    if (savedMode === "friends") {
-
-        const savedNames = Array.isArray(draft.friendNames)
-            ? draft.friendNames
-            : [];
-
-        // Anzahl der Freunde wieder einstellen
-        friendCount.value = String(
-            Math.max(1, Math.min(savedNames.length, 5))
-        );
-
-        // Passende Namensfelder erstellen
-        updateTrainingMode();
-
-        // Namen in die Felder eintragen
-        friendNames.querySelectorAll("input").forEach(
-            function(input, index) {
-                input.value = savedNames[index] || "";
-            }
-        );
-
-    } else {
-
-        // Beim Einzeltraining Freundesfelder ausblenden
-        updateTrainingMode();
-    }
-
-    // Zuletzt ausgewählte Person wieder aktivieren
-    activePerson = draft.activePerson || "Ich";
-
-    // Teilnehmer-Buttons aktualisieren
+exercises.addEventListener("input", scheduleDraftSave);
+friendNames.addEventListener("input", function() {
     updatePersonTabs();
-
-    // Gespeicherte Teilnehmerdaten wiederherstellen
-    if (draft.participantWorkouts) {
-
-        // Bereits vorhandene Daten entfernen
-        for (const person of Object.keys(participantWorkouts)) {
-            delete participantWorkouts[person];
-        }
-
-        // Alle gespeicherten Personen übernehmen
-        Object.assign(
-            participantWorkouts,
-            draft.participantWorkouts
-        );
-    }
-    // Bisheriges Formular entfernen
-    exercises.replaceChildren();
-    // Übungszähler zurücksetzen
-    exerciseCount = 0;
-    // Jede gespeicherte Übung wieder erstellen
-    for (const savedExercise of draft.exercises) {
-
-        // Bestehende Funktion zum Erstellen einer Übung nutzen
-        addExercise();
-
-        const exerciseElements = exercises.querySelectorAll(".exercise");
-        const exercise = exerciseElements[exerciseElements.length - 1];
-
-        // Gespeicherten Übungsnamen einsetzen
-        const nameInput = exercise.querySelector('input[type="text"]');
-        nameInput.value = savedExercise.name;
-
-        // Letzte Trainingswerte bei Bedarf anzeigen
-        const lastWorkoutInfo = exercise.querySelector(".last-workout-info");
-        showLastExercise(savedExercise.name, lastWorkoutInfo);
-
-        // Bereits vorhandene Sätze entfernen
-        const setsContainer = exercise.querySelector(".sets");
-        setsContainer.replaceChildren();
-
-        // Gespeicherte Sätze wiederherstellen
-        for (const savedSet of savedExercise.sets) {
-
-            const exerciseNumber = exercise.dataset.number;
-            const setNumber = setsContainer.querySelectorAll(".set").length + 1;
-
-            const set = createSet(exerciseNumber, setNumber);
-
-            // Gespeicherte Werte in die Eingabefelder einsetzen
-            set.querySelector('input[id^="weight-"]').value = savedSet.weight;
-            set.querySelector('input[id^="reps-"]').value = savedSet.reps;
-
-            setsContainer.appendChild(set);
-        }
-    }
-
-    showDraftStatus("Laufendes Training wiederhergestellt");
-    // Gesperrte Teilnehmer erst nach vollständiger
-    // Wiederherstellung der Trainingsdaten erneut sperren.
-    if (draft.participantsLocked === true) {
-    lockParticipants(false);
-}
-}
-
-
-// ==========================================
-// AUTOMATISCHE SPEICHERUNG AKTIVIEREN
-// ==========================================
-
-// Bei Änderungen an Eingabefeldern speichern
-exercises.addEventListener("input", autoSaveWorkout);
-
-// Auch Änderungen an Übungen und Sätzen erfassen
-exercises.addEventListener("click", function(event) {
-
-    if (
-        event.target.classList.contains("add-set") ||
-        event.target.classList.contains("remove-set") ||
-        event.target.classList.contains("remove-exercise")
-    ) {
-        // Erst nach den bestehenden Klick-Funktionen speichern
-        queueMicrotask(autoSaveWorkout);
-    }
+    scheduleDraftSave();
 });
 
-// Button zum Hinzufügen einer Übung
-document.getElementById("add-exercise")
-    .addEventListener("click", function() {
-        queueMicrotask(autoSaveWorkout);
-    });
-
-// ==========================================
-// SCHRITT 18.2 – FREUNDE AUSWÄHLEN
-// ==========================================
-
-// Benötigte HTML-Elemente auswählen
-const trainingModeInputs =
-    document.querySelectorAll('input[name="training-mode"]');
-
-const friendsSection = document.getElementById("friends-section");
-const friendCount = document.getElementById("friend-count");
-const friendNames = document.getElementById("friend-names");
-
-
-// ------------------------------------------
-// NAMENSFELDER ERSTELLEN
-// ------------------------------------------
-
-function updateFriendInputs() {
-
-    // Bereits eingegebene Namen merken
-    const previousNames = [...friendNames.querySelectorAll("input")]
-        .map(input => input.value);
-
-    // Bisherige Eingabefelder entfernen
-    friendNames.replaceChildren();
-
-    // Anzahl der Freunde auslesen
-    const count = Number(friendCount.value);
-
-    // Für jeden Freund ein eigenes Eingabefeld erstellen
-    for (let i = 0; i < count; i++) {
-
-        const field = document.createElement("div");
-        field.className = "friend-field";
-
-        const label = document.createElement("label");
-        label.htmlFor = `friend-${i}`;
-        label.textContent = `Name von Freund ${i + 1}`;
-
-        const input = document.createElement("input");
-        input.type = "text";
-        input.id = `friend-${i}`;
-        input.placeholder = `Freund ${i + 1}`;
-
-        // Namen beibehalten, wenn sich die Anzahl ändert
-        input.value = previousNames[i] || "";
-
-        field.appendChild(label);
-        field.appendChild(input);
-
-        friendNames.appendChild(field);
-        // Teilnehmer-Buttons aktualisieren
-        updatePersonTabs();
-    }
-    
-}
-
-
-// ------------------------------------------
-// ALLEINE ODER MIT FREUNDEN
-// ------------------------------------------
-
-function updateTrainingMode() {
-
-    const selectedMode = document.querySelector(
-        'input[name="training-mode"]:checked'
-    ).value;
-
-    // Freunde-Eingaben nur im gemeinsamen Training anzeigen
-    friendsSection.hidden = selectedMode !== "friends";
-
-    if (selectedMode === "friends") {
-        updateFriendInputs();
-    }
-}
-
-
-// Bei Änderung der Trainingsart reagieren
-trainingModeInputs.forEach(input => {
-    input.addEventListener("change", updateTrainingMode);
-});
-
-// Bei Änderung der Freundesanzahl Felder aktualisieren
-friendCount.addEventListener("change", updateFriendInputs);
-
-// Ausgangszustand festlegen
-updateTrainingMode();
-
-// ==========================================
-// SCHRITT 18.3.2 – TEILNEHMER ANZEIGEN
-// ==========================================
-
-// Container für die Teilnehmer-Buttons
-const personTabs = document.getElementById("person-tabs");
-
-// Aktuell ausgewählte Person
-let activePerson = "Ich";
-
-// ==========================================
-// TRAININGSDATEN PRO PERSON
-// ==========================================
-
-// Hier merken wir uns die Eingaben jeder Person.
-// Die Daten bleiben zunächst nur während der laufenden Sitzung erhalten.
-const participantWorkouts = {};
-
-
-
-// Teilnehmer-Buttons aktualisieren
-function updatePersonTabs() {
-
-    // Prüfen, ob alleine oder mit Freunden trainiert wird
-    const mode = document.querySelector(
-        'input[name="training-mode"]:checked'
-    ).value;
-
-    // Standardmäßig ist nur der Nutzer dabei
-    const participants = ["Ich"];
-
-    // Beim gemeinsamen Training Freunde ergänzen
-    if (mode === "friends") {
-
-        const inputs = friendNames.querySelectorAll("input");
-
-        inputs.forEach(function(input, index) {
-
-            // Eingetragenen Namen verwenden
-            const name = input.value.trim();
-
-            // Ohne Namen vorläufige Bezeichnung verwenden
-            participants.push(name || `Freund ${index + 1}`);
-        });
-    }
-
-    // Bisherige Buttons entfernen
-    personTabs.replaceChildren();
-
-    // Für jede Person einen Button erstellen
-    participants.forEach(function(person) {
-
-        const button = document.createElement("button");
-
-        button.type = "button";
-        button.className = "person-tab";
-        button.textContent = person;
-
-        // Aktuell ausgewählte Person hervorheben
-        if (person === activePerson) {
-            button.classList.add("active");
-        }
-                
-        button.addEventListener("click", function() {
-
-            // Bei einem Klick auf die bereits aktive Person
-            // muss nichts gewechselt werden.
-            if (activePerson === person) {
-                return;
-            }
-
-            // Aktuelle Eingaben sichern
-            savePersonInputs();
-
-            // Neue Person auswählen
-            activePerson = person;
-
-            // Eingaben der neuen Person anzeigen
-            loadPersonInputs(activePerson);
-
-            // Teilnehmer-Buttons aktualisieren
-            updatePersonTabs();
-        });
-
-        personTabs.appendChild(button);
-    });
-
-    // Falls eine Person entfernt wurde, zu "Ich" wechseln
-    if (!participants.includes(activePerson)) {
-        activePerson = "Ich";
-        updatePersonTabs();
-    }
-}
-
-
-// Wenn ein Freundesname geändert wird,
-// Teilnehmer-Buttons direkt aktualisieren
-friendNames.addEventListener("input", updatePersonTabs);
-
-// Wenn die Trainingsart geändert wird,
-// Teilnehmerliste aktualisieren
 trainingModeInputs.forEach(function(input) {
-    input.addEventListener("change", updatePersonTabs);
+    input.addEventListener("change", function() {
+        rememberCurrentPerson();
+        updateTrainingMode();
+        scheduleDraftSave();
+    });
 });
 
-// Beim Laden der Seite Teilnehmer anzeigen
-updatePersonTabs();
-// ==========================================
-// EINGABEN DER AKTUELLEN PERSON MERKEN
-// ==========================================
+friendCount.addEventListener("change", function() {
+    rememberCurrentPerson();
+    updateFriendInputs();
+    scheduleDraftSave();
+});
 
-function savePersonInputs() {
-
-    // Unsere bestehende Funktion sammelt alle Übungsdaten,
-    // auch wenn Gewicht oder Wiederholungen noch leer sind.
-    const draft = collectWorkoutDraft();
-
-    // Daten der aktuellen Person zuordnen
-    participantWorkouts[activePerson] = draft.exercises;
-}
-
-
-// ==========================================
-// EINGABEN EINER PERSON ANZEIGEN
-// ==========================================
-
-function loadPersonInputs(person) {
-
-    // Bisherige Übungen aus der Ansicht entfernen
-    exercises.replaceChildren();
-
-    // Übungszähler zurücksetzen
-    exerciseCount = 0;
-
-    // Gespeicherte Eingaben der gewählten Person abrufen
-    const savedExercises = participantWorkouts[person];
-
-    // Neue Person ohne Eingaben: leere Übung anzeigen
-    if (!savedExercises) {
-        addExercise();
-        return;
-    }
-
-    // Alle Übungen der ausgewählten Person wiederherstellen
-    for (const savedExercise of savedExercises) {
-
-        addExercise();
-
-        // Zuletzt erstellte Übung auswählen
-        const exerciseElements = exercises.querySelectorAll(".exercise");
-        const exercise = exerciseElements[exerciseElements.length - 1];
-
-        // Übungsnamen wiederherstellen
-        const nameInput = exercise.querySelector('input[type="text"]');
-        nameInput.value = savedExercise.name;
-
-        // Letzte Trainingswerte anzeigen
-        const lastInfo = exercise.querySelector(".last-workout-info");
-        showLastExercise(savedExercise.name, lastInfo);
-
-        // Automatisch erstellte Sätze entfernen
-        const setsContainer = exercise.querySelector(".sets");
-        setsContainer.replaceChildren();
-
-        // Gespeicherte Sätze der Person hinzufügen
-        savedExercise.sets.forEach(function(savedSet, index) {
-
-            const set = createSet(exercise.dataset.number, index + 1);
-
-            set.querySelector('input[id^="weight-"]').value =
-                savedSet.weight;
-
-            set.querySelector('input[id^="reps-"]').value =
-                savedSet.reps;
-
-            setsContainer.appendChild(set);
-        });
-    }
-}
-
-// ==========================================
-// SCHRITT 18.7.1 – TEILNEHMER SPERREN
-// ==========================================
-
-// Merkt sich, ob die Teilnehmer bestätigt wurden
-let participantsLocked = false;
-
-// Benötigte HTML-Elemente
-const confirmParticipantsButton =
-    document.getElementById("confirm-participants");
-
-const participantsStatus =
-    document.getElementById("participants-status");
-
-
-// Teilnehmerauswahl sperren
-function lockParticipants(saveDraft = true) {
-
-    // Trainingsart bestimmen
-    const mode = document.querySelector(
-        'input[name="training-mode"]:checked'
-    ).value;
-
-    // Bei gemeinsamem Training Namen prüfen
-    if (mode === "friends") {
-
-        const names = [...friendNames.querySelectorAll("input")]
-            .map(input => input.value.trim());
-
-        // Leere Namen verhindern
-        if (names.some(name => name === "")) {
-            participantsStatus.textContent =
-                "Bitte gib zuerst alle Freundesnamen ein.";
-            return;
-        }
-
-        // Doppelte Namen verhindern
-        const normalized = ["ich", ...names.map(
-            name => name.toLowerCase()
-        )];
-
-        if (new Set(normalized).size !== normalized.length) {
-            participantsStatus.textContent =
-                "Bitte verwende unterschiedliche Namen.";
-            return;
-        }
-    }
-
-    // Teilnehmer als bestätigt markieren
-    participantsLocked = true;
-
-    // Auswahl der Trainingsart sperren
-    trainingModeInputs.forEach(function(input) {
-        input.disabled = true;
-    });
-
-    // Freundesanzahl sperren
-    friendCount.disabled = true;
-
-    // Freundesnamen sperren
-    friendNames.querySelectorAll("input").forEach(function(input) {
-        input.disabled = true;
-    });
-
-    // Bestätigungsbutton deaktivieren
-    confirmParticipantsButton.disabled = true;
-    confirmParticipantsButton.textContent = "Teilnehmer bestätigt ✓";
-
-    participantsStatus.textContent =
-        "Teilnehmer festgelegt. Du kannst jetzt trainieren.";
-
-    // Teilnehmer-Buttons mit den endgültigen Namen anzeigen
-    updatePersonTabs();
-    // Nur beim normalen Bestätigen speichern,
-    // nicht während der Wiederherstellung.
-    if (saveDraft) {
-    autoSaveWorkout();
-}
-}
-
-
-// Bei Klick Teilnehmer bestätigen
-confirmParticipantsButton.addEventListener(
-    "click",
-    lockParticipants
-);
-
-// ==========================================
-// APP INITIALISIEREN – ENTWURF WIEDERHERSTELLEN
-// ==========================================
-
-// Gespeicherten Trainingsplan erst laden,
-// nachdem die Teilnehmerverwaltung vorbereitet wurde
-loadSelectedPlan();
-
-// Anschließend ein eventuell laufendes Training wiederherstellen
-restoreWorkoutDraft();
-
-// ==========================================
-// SCHRITT 21.2 – NEUES TRAINING STARTEN
-// ==========================================
-
-const newWorkoutButton = document.getElementById("new-workout");
-
+confirmParticipantsButton.addEventListener("click", function() {
+    lockParticipants(true);
+});
+saveWorkoutButton.addEventListener("click", saveWorkout);
 newWorkoutButton.addEventListener("click", function() {
-
-    // 1. Gespeicherten Entwurf entfernen
-    // Bereits abgeschlossene Trainings bleiben erhalten.
-    clearWorkoutDraft();
-
-    // 2. Trainingsseite neu öffnen
-    // Ohne ?plan=... starten wir ein freies Training.
     window.location.href = "training.html";
 });
+
+// Noch ausstehende Änderungen vor dem Verlassen zuverlässig sichern.
+window.addEventListener("pagehide", function() {
+    if (draftTimer !== null) persistDraft();
+});
+document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === "hidden" && draftTimer !== null) persistDraft();
+});
+
+// Erst DOM und Teilnehmerverwaltung vorbereiten, dann einen Plan oder
+// einen vorhandenen Entwurf einsetzen.
+addExercise();
+updateTrainingMode();
+loadExerciseSuggestions();
+updateSavedCount();
+loadSelectedPlan();
+restoreWorkoutDraft();

@@ -1,1535 +1,1214 @@
+/* =========================================================
+   GYM TRACKER – BEREINIGTES DESIGN
+   Gemeinsame Farben + Navigation + einzelne Seiten.
+   Ersetzt die komplette bisherige style.css.
+   ========================================================= */
 
-/* ==========================================
-   ALLGEMEINES DESIGN
-   ========================================== */
+/* 1. DESIGN-VARIABLEN ===================================== */
+:root {
+    color-scheme: light;
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-primary-soft: #eff6ff;
+    --color-background: #f5f7fa;
+    --color-surface: #ffffff;
+    --color-surface-secondary: #f1f5f9;
+    --color-text: #0f172a;
+    --color-text-secondary: #64748b;
+    --color-border: #e2e8f0;
+    --color-success: #16a34a;
+    --color-danger: #dc2626;
+    --radius-small: 8px;
+    --radius-medium: 12px;
+    --radius-large: 16px;
+    --spacing-small: 8px;
+    --spacing-medium: 16px;
+    --spacing-large: 24px;
+    --card-shadow: 0 3px 12px rgba(15, 23, 42, .04);
+}
 
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --color-primary: #3b82f6;
+    --color-primary-hover: #60a5fa;
+    --color-primary-soft: #1e3a5f;
+    --color-background: #101827;
+    --color-surface: #1e293b;
+    --color-surface-secondary: #273449;
+    --color-text: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-border: #334155;
+    --color-success: #4ade80;
+    --color-danger: #f87171;
+    --card-shadow: 0 3px 12px rgba(0, 0, 0, .12);
+}
+
+/* 2. GEMEINSAME GRUNDLAGEN ================================ */
+*, *::before, *::after { box-sizing: border-box; }
+html { min-width: 320px; }
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    color: #222;
-    margin: 30px;
-}
-
-/* Hauptbereich der Anwendung */
-main {
-    max-width: 650px;
-}
-
-
-/* ==========================================
-   ÜBUNGEN UND SÄTZE
-   ========================================== */
-
-/* Rahmen für einzelne Übungen */
-.exercise {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-/* Abstand zwischen den Sätzen */
-.set {
-    margin-bottom: 15px;
-}
-
-
-/* ==========================================
-   EINGABEFELDER UND BUTTONS
-   ========================================== */
-
-input {
-    padding: 8px;
-    margin: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    padding: 10px 15px;
-    background-color: #222;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-/* Button verändert sich beim Darüberfahren */
-button:hover {
-    background-color: #444;
-}
-
-
-/* ==========================================
-   TRAININGSHISTORIE
-   ========================================== */
-
-/* Einzelne gespeicherte Trainingseinheit */
-.history-workout {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-/* Anklickbare Überschrift des Trainings */
-.history-workout summary {
-    cursor: pointer;
-    font-weight: bold;
-    padding: 5px;
-}
-
-/* Abstand der angezeigten Sätze */
-.history-workout p {
-    margin: 8px 0;
-}
-
-/* Übungsüberschriften */
-.history-workout h4 {
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-/* Navigation am Seitenende */
-nav {
-    margin-top: 30px;
-}
-
-
-/* ==========================================
-   LETZTE TRAININGSWERTE
-   ========================================== */
-
-.last-workout-info {
-    background-color: #f5f5f5;
-    border-radius: 6px;
-    padding: 12px;
-    margin: 15px 0;
-}
-
-.last-workout-info h4 {
-    margin-top: 0;
-}
-
-.last-workout-info p {
-    margin: 6px 0;
-}
-
-
-/* ==========================================
-   ENTFERNEN-BUTTONS
-   ========================================== */
-
-/* Rote Buttons zum Entfernen */
-.remove-set,
-.remove-exercise {
-    background-color: #dc3545;
-    font-size: 12px;
-    padding: 7px 10px;
-    margin: 5px 0 10px;
-}
-
-/* Button beim Darüberfahren */
-.remove-set:hover,
-.remove-exercise:hover {
-    background-color: #b02a37;
-}
-
-
-/* ==========================================
-   TRAININGSPLAN ERSTELLEN
-   ========================================== */
-
-/* Abstand zwischen den Übungen */
-.plan-exercise {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 12px;
-}
-
-/* Entfernen-Button */
-.remove-plan-exercise {
-    background-color: #dc3545;
-}
-
-.remove-plan-exercise:hover {
-    background-color: #b02a37;
-}
-
-
-/* ==========================================
-   TRAININGSPLÄNE AUF DER STARTSEITE
-   ========================================== */
-
-/* Einzelne Trainingsplan-Karte */
-.plan-card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin: 12px 0;
-}
-
-/* Name des Trainingsplans */
-.plan-card h3 {
-    margin-top: 0;
-}
-
-/* Anzahl der Übungen */
-.plan-card p {
-    color: #666;
-    margin-bottom: 0;
-}
-
-
-/* ==========================================
-   ANKLICKBARE TRAININGSPLÄNE
-   ========================================== */
-
-.plan-card {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    cursor: pointer;
-}
-
-/* Visuelles Feedback beim Darüberfahren */
-.plan-card:hover {
-    background-color: #f0f0f0;
-    border-color: #aaa;
-}
-
-
-/* ==========================================
-   AKTIONEN FÜR TRAININGSPLÄNE
-   ========================================== */
-
-.plan-action {
-    display: inline-block;
-    padding: 10px 14px;
-    margin: 8px 8px 0 0;
-    background-color: #222;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.plan-action:hover {
-    background-color: #444;
-}
-
-
-/* ==========================================
-   TRAININGSPLAN LÖSCHEN
-   ========================================== */
-
-/* Roter Löschen-Button */
-.delete-plan {
-    background-color: #dc3545;
-    margin: 8px 0 0;
-}
-
-.delete-plan:hover {
-    background-color: #b02a37;
-}
-
-
-/* ==========================================
-   BACKUP IMPORTIEREN
-   ========================================== */
-
-/* Abstand zum oberen Exportbereich */
-#import-section {
-    margin-top: 35px;
-    padding-top: 20px;
-    border-top: 1px solid #ddd;
-}
-
-/* Abstand für die Dateiauswahl */
-#backup-file {
-    display: block;
-    margin: 15px 0;
-}
-
-
-/* ==========================================
-   TRAININGSHISTORIE - LÖSCHEN
-   ========================================== */
-
-/* Löschen-Button in einer Trainingseinheit */
-.delete-workout {
-    background-color: #dc3545;
-    margin-top: 15px;
-}
-
-.delete-workout:hover {
-    background-color: #b02a37;
-}
-
-
-/* ==========================================
-   EINZELNE ÜBUNGEN AUS HISTORIE ENTFERNEN
-   ========================================== */
-
-.delete-exercise-history {
-    background-color: #dc3545;
-    font-size: 12px;
-    padding: 7px 10px;
-    margin: 5px 0 15px;
-}
-
-.delete-exercise-history:hover {
-    background-color: #b02a37;
-}
-
-
-/* ==========================================
-   GESPEICHERTE SÄTZE BEARBEITEN
-   ========================================== */
-
-/* Einzelner Satz in der Trainingshistorie */
-.history-set {
-    margin: 10px 0;
-}
-
-/* Kleiner Bearbeiten-Button */
-.edit-set {
-    margin-left: 12px;
-    padding: 5px 10px;
-    font-size: 12px;
-}
-
-/* Formular zum Bearbeiten eines Satzes */
-.set-edit-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 10px 0;
-}
-
-/* Eingabefelder für Gewicht und Wiederholungen */
-.set-edit-form input {
-    width: 90px;
-    box-sizing: border-box;
-}
-
-
-/* ==========================================
-   TRAININGSSTATISTIKEN
-   ========================================== */
-
-/* Abstand zwischen den Bereichen */
-#statistics-section {
-    margin-top: 30px;
-}
-
-/* Reiter nebeneinander anzeigen */
-.stat-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 20px 0;
-}
-
-/* Standarddesign der Reiter */
-.stat-tab {
-    background-color: #e5e5e5;
-    color: #222;
-}
-
-/* Aktuell ausgewählter Reiter */
-.stat-tab.active {
-    background-color: #2563eb;
-    color: white;
-}
-
-/* Bereich für das Diagramm */
-#chart-container {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 20px;
-}
-
-/* Diagramm an die Bildschirmbreite anpassen */
-#chart-container svg {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-/* Übungsauswahl */
-#exercise-select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-
-/* ==========================================
-   NEUES STARTSEITEN-DESIGN
-   ========================================== */
-
-/* Nur die Startseite erhält den Dark Mode */
-body.home-page {
-    margin: 0;
+    min-width: 320px;
     min-height: 100vh;
-    background: #0c1220;
-    color: #f9fafb;
-    font-family: Arial, sans-serif;
-}
-
-/* Alle Elemente berücksichtigen ihre Innenabstände */
-.home-page * {
-    box-sizing: border-box;
-}
-
-/* ==========================================
-   HEADER
-   ========================================== */
-
-.home-header {
-    max-width: 1050px;
-    margin: auto;
-    padding: 25px 24px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.home-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    color: white;
-    text-decoration: none;
-    font-size: 18px;
-    font-weight: bold;
-    letter-spacing: 1px;
-}
-
-.logo-icon {
-    display: grid;
-    place-items: center;
-
-    width: 38px;
-    height: 38px;
-
-    background: #5044c7;
-    border-radius: 12px;
-    color: white;
-}
-
-.home-label {
-    background: #1c2536;
-    color: #a5b4fc;
-    padding: 8px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    letter-spacing: 1px;
-}
-
-/* ==========================================
-   HAUPTBEREICH
-   ========================================== */
-
-.home-main {
-    max-width: 950px;
-    margin: 0 auto;
-    padding: 25px 24px 110px;
-}
-
-.home-welcome {
-    margin-bottom: 32px;
-}
-
-.home-eyebrow {
-    font-size: 11px;
-    font-weight: bold;
-    letter-spacing: 2px;
-    color: #a5b4fc;
-}
-
-.home-welcome h1 {
-    font-size: clamp(30px, 6vw, 46px);
-    margin: 12px 0;
-    letter-spacing: -1px;
-}
-
-.home-welcome > p:last-child {
-    color: #9ca3af;
-    font-size: 15px;
-}
-
-/* ==========================================
-   FREIES TRAINING
-   ========================================== */
-
-.free-workout-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 25px;
-
-    min-height: 230px;
-    padding: 26px;
-
-    background: linear-gradient(
-        135deg,
-        #6357df,
-        #4338ca
-    );
-
-    color: white;
-    text-decoration: none;
-    border-radius: 20px;
-
-    box-shadow: 0 12px 30px rgba(67, 56, 202, 0.2);
-    transition: transform 0.2s;
-}
-
-.free-workout-card:hover {
-    transform: translateY(-3px);
-}
-
-.workout-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.workout-icon {
-    font-size: 25px;
-}
-
-.workout-arrow {
-    font-size: 26px;
-}
-
-.free-workout-card h2 {
-    margin: 0 0 8px;
-    font-size: 23px;
-}
-
-.free-workout-card p {
     margin: 0;
-    color: #e0e7ff;
-    font-size: 14px;
-    line-height: 1.6;
+    padding-bottom: calc(95px + env(safe-area-inset-bottom));
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.45;
 }
+main { min-width: 0; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+a { -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+input, select, textarea { max-width: 100%; }
 
-.start-link {
-    font-weight: bold;
-    font-size: 14px;
-}
-
-/* ==========================================
-   MEINE TRAININGSPLÄNE
-   ========================================== */
-
-.home-plans {
-    margin-top: 40px;
-}
-
-.section-heading h2 {
-    font-size: 21px;
-    margin-bottom: 20px;
-}
-
-/* Gespeicherte Pläne als Grid darstellen */
-.home-page #saved-plans {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-}
-
-/* Bestehende, von home.js erstellte Karten */
-.home-page .plan-card {
-    background: #1c2536;
-    border: 1px solid #323c50;
-    border-radius: 16px;
-
-    padding: 20px;
-    margin: 0;
-
-    color: white;
-    cursor: default;
-
-    transition: background 0.2s, border-color 0.2s;
-}
-
-.home-page .plan-card:hover {
-    background: #252f43;
-    border-color: #7065e8;
-}
-
-.home-page .plan-card h3 {
-    font-size: 18px;
-    margin: 0 0 10px;
-}
-
-.home-page .plan-card p {
-    color: #9ca3af;
-    font-size: 13px;
-}
-
-/* Buttons für Plan starten und bearbeiten */
-.home-page .plan-action {
-    display: inline-block;
-    background: #393365;
-    color: #ddd6fe;
-
-    padding: 10px 12px;
-    margin: 12px 6px 0 0;
-
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.home-page .plan-action:hover {
-    background: #5044c7;
-    color: white;
-}
-
-/* Bestehender Löschen-Button */
-.home-page .delete-plan {
-    display: inline-block;
-    background: #492935;
-    color: #fda4af;
-
-    padding: 10px 12px;
-    margin: 10px 0 0;
-
-    border-radius: 8px;
-    font-size: 12px;
-}
-
-.home-page .delete-plan:hover {
-    background: #7f1d1d;
-    color: white;
-}
-
-/* Neuen Trainingsplan erstellen */
-.create-plan-link {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-
-    padding: 17px;
-    margin-top: 15px;
-
-    color: #c4b5fd;
-    background: #192234;
-    border: 1px dashed #5b5491;
-    border-radius: 14px;
-
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.create-plan-link:hover {
-    background: #252e46;
-}
-
-/* ==========================================
-   NAVIGATION
-   ========================================== */
-
-.home-page .home-navigation {
+/* Fester Navigationsbereich auf allen Seiten */
+.home-navigation {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
+    bottom: 0; left: 0; right: 0;
     display: flex;
     justify-content: space-around;
-
+    gap: 0;
     margin: 0;
-    padding: 12px 8px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-
-    background: #111827;
-    border-top: 1px solid #30394b;
-
+    padding: 12px 8px max(12px, env(safe-area-inset-bottom));
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
     z-index: 100;
 }
-
 .home-navigation a {
     display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
-
-    flex: 1;
-
-    color: #9ca3af;
+    color: var(--color-text-secondary);
+    text-align: center;
     text-decoration: none;
     font-size: 10px;
 }
-
-.home-navigation a.active {
-    color: #a5b4fc;
+.home-navigation a.active { color: var(--color-primary); font-weight: 600; }
+.home-navigation svg {
+    width: 23px;
+    height: 23px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-.nav-icon {
-    font-size: 23px;
-}
-
-/* ==========================================
-   SMARTPHONE-OPTIMIERUNG
-   ========================================== */
-
-@media (max-width: 600px) {
-
-    .home-header {
-        padding: 18px 18px;
-    }
-
-    .home-main {
-        padding: 18px 18px 110px;
-    }
-
-    .home-welcome {
-        margin-bottom: 25px;
-    }
-
-    .free-workout-card {
-        min-height: 210px;
-        padding: 22px;
-    }
-
-    /* Auf kleinen Displays Karten untereinander */
-    .home-page #saved-plans {
-        grid-template-columns: 1fr;
-    }
-
-    .home-page .plan-card {
-        padding: 18px;
-    }
-
-    .home-navigation a {
-        font-size: 10px;
-    }
-}
-
-/* ==========================================
-   SCHRITT 17 – TRAININGSSEITE DARK MODE
-   ========================================== */
-
-/* Grunddesign nur für training.html */
-body.training-page {
-    margin: 0;
-    min-height: 100vh;
-    background: #0c1220;
-    color: #f9fafb;
-    font-family: Arial, sans-serif;
-}
-
-/* Verhindert unerwartete Überbreiten */
-.training-page * {
-    box-sizing: border-box;
-}
-
-/* ==========================================
-   KOPFBEREICH
-   ========================================== */
-
-.training-header {
-    max-width: 900px;
-    margin: auto;
-    padding: 22px 20px;
-
+/* 3. HOME ================================================= */
+.home-page .home-header {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 25px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    border-bottom: 1px solid #293244;
 }
-
-.training-back {
-    color: #a5b4fc;
+.home-page .home-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-text);
     text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.training-header-title {
-    font-size: 13px;
-    font-weight: bold;
+    font-size: 18px;
+    font-weight: 700;
     letter-spacing: 1px;
-    color: #e5e7eb;
 }
-
-/* ==========================================
-   HAUPTBEREICH
-   ========================================== */
-
-.training-main {
-    width: 100%;
-    max-width: 750px;
-    margin: 0 auto;
-    padding: 24px 18px 55px;
+.home-page .logo-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    background: var(--color-primary);
+    border-radius: 12px;
+    color: #ffffff;
 }
-
-.training-intro {
-    margin-bottom: 30px;
-}
-
-.training-eyebrow {
-    color: #a5b4fc;
+.home-page .home-label {
+    padding: 8px 12px;
+    background: var(--color-primary-soft);
+    border-radius: 20px;
+    color: var(--color-primary);
     font-size: 11px;
+    letter-spacing: 1px;
+}
+.home-page .home-main {
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 25px 24px 120px;
+}
+.home-page .home-welcome { margin-bottom: 24px; }
+.home-page .home-eyebrow {
+    color: var(--color-primary);
+    font-size: 11px;
+    font-weight: 700;
     letter-spacing: 2px;
-    font-weight: bold;
 }
-
-.training-intro h1 {
+.home-page .home-welcome h1 {
     margin: 12px 0;
-    font-size: clamp(28px, 6vw, 42px);
+    font-size: clamp(30px, 6vw, 46px);
+    letter-spacing: -1px;
 }
-
-.training-intro > p:last-child {
-    color: #9ca3af;
+.home-page .home-welcome > p:last-child {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+}
+.home-page .home-start { margin-bottom: 28px; }
+.home-page .free-workout-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 190px;
+    padding: 24px;
+    background: var(--color-primary);
+    border-radius: 18px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: transform .2s;
+}
+.home-page .free-workout-card:hover { transform: translateY(-3px); }
+.home-page .workout-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.home-page .workout-icon { font-size: 25px; }
+.home-page .workout-arrow { font-size: 26px; }
+.home-page .free-workout-card h2 { margin: 0 0 8px; font-size: 23px; }
+.home-page .free-workout-card p {
+    margin: 0;
+    color: #dbeafe;
     font-size: 14px;
     line-height: 1.6;
 }
-
-/* ==========================================
-   ÜBUNGSKARTEN
-   ========================================== */
-
-.training-page .exercise {
-    background: #1c2536;
-    border: 1px solid #323c50;
-    border-radius: 18px;
-
+.home-page .start-link { font-size: 14px; font-weight: 700; }
+.home-page .home-dashboard { margin-bottom: 34px; }
+.home-page .home-dashboard h2,
+.home-page .section-heading h2 {
+    margin: 0 0 16px;
+    color: var(--color-text);
+    font-size: 19px;
+    letter-spacing: -.3px;
+}
+.home-page .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+.home-page .dashboard-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
     padding: 20px;
-    margin-bottom: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
 }
-
-.training-page .exercise h3 {
-    margin-top: 0;
-    color: #ffffff;
+.home-page .dashboard-card-icon { color: var(--color-primary); font-size: 24px; }
+.home-page .dashboard-card strong {
+    color: var(--color-text);
+    font-size: 32px;
+    line-height: 1.1;
 }
-
-/* Allgemeine Eingabefelder im Training */
-.training-page input {
-    max-width: 100%;
-    background: #101827;
-    color: #ffffff;
-
-    border: 1px solid #465168;
-    border-radius: 10px;
-
-    padding: 12px;
-    margin: 6px 0;
-
-    font-size: 16px;
+.home-page .dashboard-card > span:last-child {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
 }
-
-/* Hervorhebung beim Bearbeiten */
-.training-page input:focus {
-    outline: 2px solid #818cf8;
-    border-color: #818cf8;
+.home-page .home-plans { margin-top: 40px; }
+.home-page #saved-plans {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
 }
-
-/* ==========================================
-   EINZELNE SÄTZE
-   ========================================== */
-
-.training-page .set {
-    background: #141e2e;
-    border: 1px solid #303b50;
-    border-radius: 12px;
-
-    padding: 14px;
-    margin-bottom: 12px;
+.home-page #saved-plans .plan-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
+    margin: 0;
+    padding: 20px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+    box-shadow: var(--card-shadow);
+    cursor: default;
 }
-
-/* Überschriften und Beschriftungen */
-.training-page label {
-    color: #e5e7eb;
+.home-page .plan-card h3 { margin: 0; color: var(--color-text); font-size: 18px; }
+.home-page .plan-card p {
+    margin: 0;
+    color: var(--color-text-secondary);
     font-size: 13px;
 }
-
-/* Gewicht und Wiederholungen */
-.training-page .set input {
-    width: 110px;
-    max-width: 100%;
-}
-
-/* ==========================================
-   LETZTE TRAININGSWERTE
-   ========================================== */
-
-.training-page .last-workout-info {
-    background: #111827;
-    color: #cbd5e1;
-
-    border: 1px solid #374151;
-    border-radius: 10px;
-
+.home-page .plan-card .plan-action {
+    display: block;
+    margin: 0;
     padding: 12px;
-    margin: 15px 0;
-}
-
-/* ==========================================
-   BUTTONS
-   ========================================== */
-
-/* Alle Buttons auf der Trainingsseite */
-.training-page button {
-    border: none;
-    border-radius: 10px;
-
-    padding: 12px 16px;
+    border-radius: var(--radius-medium);
+    text-align: center;
+    text-decoration: none;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
+}
+.home-page .plan-card .plan-action:first-of-type {
+    background: var(--color-primary);
+    color: #ffffff;
+}
+.home-page .plan-card .plan-action:nth-of-type(2) {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+.home-page .plan-card .delete-plan {
+    min-height: 42px;
+    padding: 10px;
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    font-size: 14px;
+}
+.home-page .create-plan-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 17px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+    border: 1px dashed var(--color-primary);
+    border-radius: 14px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+}
+.home-page .create-plan-link:hover { background: var(--color-primary-soft); }
 
+/* 4. TRAINING ============================================= */
+.training-page .training-main {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 20px 110px;
+}
+.training-page .training-intro { margin-bottom: 28px; }
+.training-page .training-eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+.training-page .training-intro h1 {
+    margin: 0 0 10px;
+    color: var(--color-text);
+    font-size: 30px;
+    font-weight: 750;
+    letter-spacing: -.5px;
+}
+.training-page .training-intro > p:last-child {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+.training-page .training-participants,
+.training-page .active-person-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+}
+.training-page .training-participants h2,
+.training-page .active-person-section h2 {
+    margin: 0 0 12px;
+    color: var(--color-text);
+    font-size: 18px;
+}
+.training-page .training-participants p,
+.training-page .active-person-section p {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+.training-page .training-mode {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0;
+}
+.training-page .training-mode label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: var(--color-surface-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
     cursor: pointer;
 }
-
-/* Übung hinzufügen */
-.training-page #add-exercise {
+.training-page input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--color-primary);
+}
+.training-page #friends-section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--color-border);
+}
+.training-page #friend-count,
+.training-page .friend-field input {
     display: block;
     width: 100%;
-    margin-top: 12px;
-
-    padding: 17px;
-
-    background: #1e293b;
-    color: #c4b5fd;
-    border: 1px dashed #6366f1;
-}
-
-.training-page #add-exercise:hover {
-    background: #303659;
-}
-
-/* Training speichern */
-.training-page #save-workout {
-    display: block;
-    width: 100%;
-
-    padding: 18px;
-    margin-top: 25px;
-
-    background: linear-gradient(
-        135deg,
-        #6357df,
-        #4338ca
-    );
-
-    color: white;
+    min-height: 44px;
+    margin: 8px 0 14px;
+    padding: 10px 12px;
+    background: var(--color-surface-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
     font-size: 16px;
 }
-
-.training-page #save-workout:hover {
-    background: #3730a3;
+.training-page .friend-field { margin-bottom: 12px; }
+.training-page .friend-field label { color: var(--color-text-secondary); font-size: 13px; }
+.training-page .training-participants input:disabled,
+.training-page .training-participants select:disabled {
+    opacity: .65;
+    cursor: not-allowed;
 }
-
-/* Löschen-Buttons bleiben rot */
-.training-page .remove-set,
-.training-page .remove-exercise {
-    background: #7f1d1d;
-    color: #fecaca;
-
-    font-size: 12px;
+.training-page #person-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+.training-page .person-tab {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 10px 18px;
+    background: var(--color-surface-secondary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-weight: 500;
+}
+.training-page .person-tab.active {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-primary);
+}
+.training-page #exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 24px 0;
+}
+.training-page .exercise {
+    min-width: 0;
+    margin: 0;
+    padding: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+    box-shadow: var(--card-shadow);
+}
+.training-page .exercise legend {
+    padding: 0 8px;
+    color: var(--color-primary);
+    font-size: 17px;
+    font-weight: 700;
+}
+.training-page .exercise > label {
+    display: block;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+.training-page #exercises input {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
     padding: 10px 12px;
+    background: var(--color-surface-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    font-size: 16px;
 }
-
-.training-page .remove-set:hover,
-.training-page .remove-exercise:hover {
-    background: #991b1b;
+.training-page .exercise > input[type="text"] { margin: 8px 0 14px; }
+.training-page #exercises input:focus {
+    border-color: var(--color-primary);
+    outline: 2px solid var(--color-primary-soft);
+    outline-offset: 1px;
 }
-
-/* ==========================================
-   STATUSMELDUNGEN
-   ========================================== */
-
-.training-page #save-status {
-    font-weight: bold;
-    margin-top: 18px;
-}
-
-.training-page #draft-status {
-    color: #86efac;
+.training-page .last-workout-info {
+    margin: 14px 0;
+    padding: 12px 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-text);
+    border-radius: var(--radius-medium);
     font-size: 13px;
-    margin-top: 12px;
+    line-height: 1.5;
 }
-
-.training-page #saved-count {
-    color: #94a3b8;
-    font-size: 12px;
+.training-page .last-workout-info h4 {
+    margin: 0 0 6px;
+    color: var(--color-primary);
 }
-
-/* ==========================================
-   SMARTPHONE-OPTIMIERUNG
-   ========================================== */
-
-@media (max-width: 600px) {
-
-    .training-header {
-        padding: 18px 16px;
-    }
-
-    .training-main {
-        padding: 20px 14px 45px;
-    }
-
-    .training-page .exercise {
-        padding: 16px;
-    }
-
-    .training-page .set {
-        padding: 12px;
-    }
-
-    /* Eingabefelder bleiben gut bedienbar */
-    .training-page .set input {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    /* Buttons zur besseren Bedienbarkeit */
-    .training-page .exercise button {
-        min-height: 42px;
-    }
-
-    .training-page #save-workout {
-        min-height: 55px;
-    }
+.training-page .last-workout-info p {
+    margin: 4px 0;
+    color: var(--color-text-secondary);
 }
-
-/* ==========================================
-   SCHRITT 17.2 – MOBILE SATZ-EINGABE
-   ========================================== */
-
-/* Satznummer und Entfernen-Button */
+.training-page .last-workout-info:empty { display: none; }
+.training-page .set {
+    margin: 12px 0;
+    padding: 14px;
+    background: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+}
 .training-page .set-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
 }
-
-/* Satznummer hervorheben */
-.training-page .set-header h4 {
-    margin: 0;
-    font-size: 15px;
-    color: #f9fafb;
-}
-
-/* Entfernen-Button kompakt halten */
-.training-page .set-header .remove-set {
-    margin: 0;
-    padding: 9px 12px;
-    font-size: 12px;
-}
-
-/* Gewicht und Wiederholungen nebeneinander */
+.training-page .set-header h4 { margin: 0; color: var(--color-text); font-size: 15px; }
 .training-page .set-inputs {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
-
-/* Einzelner Eingabebereich */
-.training-page .set-field {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-/* Beschriftung */
+.training-page .set-field { min-width: 0; }
 .training-page .set-field label {
-    font-size: 12px;
-    color: #9ca3af;
+    display: block;
+    margin-bottom: 6px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
 }
-
-/* Eingabefelder nutzen ihre ganze Spaltenbreite */
-.training-page .set-field input {
-    width: 100%;
-    min-width: 0;
-    margin: 0;
-    font-size: 18px;
-    text-align: center;
+.training-page .set-field input { text-align: center; }
+.training-page #exercises button { min-height: 40px; border-radius: var(--radius-small); }
+.training-page .remove-set,
+.training-page .remove-exercise {
+    padding: 8px 12px;
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-border);
 }
-
-/* Satz hinzufügen */
+.training-page .remove-exercise { margin-bottom: 12px; }
 .training-page .add-set {
     width: 100%;
     margin-top: 8px;
-    padding: 14px;
-    background: #393365;
-    color: #ddd6fe;
+    padding: 12px 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border: 1px solid transparent;
+    font-weight: 600;
 }
-
-.training-page .add-set:hover {
-    background: #5044c7;
-}
-
-/* Besonders kleine Smartphone-Displays */
-@media (max-width: 360px) {
-
-    .training-page .set-inputs {
-        gap: 8px;
-    }
-
-    .training-page .set-field input {
-        padding: 10px 6px;
-        font-size: 16px;
-    }
-}
-
-
-/* ==========================================
-   SCHRITT 18.1 – TEILNEHMERAUSWAHL
-   ========================================== */
-
-.training-page .training-participants {
-    background: #1c2536;
-    border: 1px solid #323c50;
-    border-radius: 18px;
-    padding: 20px;
-    margin-bottom: 25px;
-}
-
-.training-page .training-participants h2 {
-    margin-top: 0;
-    font-size: 20px;
-}
-
-.training-page .training-participants p {
-    color: #9ca3af;
-    font-size: 14px;
-}
-
-/* Auswahlmöglichkeiten untereinander */
-.training-page .training-mode {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 18px;
-}
-
-.training-page .training-mode label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    background: #141e2e;
-    border: 1px solid #374151;
-    border-radius: 12px;
-    padding: 14px;
-
-    cursor: pointer;
-}
-
-/* Radio-Buttons */
-.training-page .training-mode input {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    accent-color: #818cf8;
-}
-
-/* ==========================================
-   SCHRITT 18.2 – FREUNDESNAMEN
-   ========================================== */
-
-/* Versteckte Bereiche wirklich ausblenden */
-.training-page [hidden] {
-    display: none !important;
-}
-
-/* Eingabebereich für Freunde */
-.training-page #friends-section {
-    margin-top: 20px;
-    padding-top: 18px;
-    border-top: 1px solid #374151;
-}
-
-/* Auswahl der Freundesanzahl */
-.training-page #friend-count {
+.training-page #confirm-participants,
+.training-page #add-exercise,
+.training-page #save-workout,
+.training-page #new-workout {
     display: block;
     width: 100%;
-    margin: 10px 0 20px;
-    padding: 13px;
-
-    background: #101827;
-    color: white;
-    border: 1px solid #465168;
-    border-radius: 10px;
-    font-size: 16px;
-}
-
-/* Abstand zwischen den Namensfeldern */
-.training-page .friend-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 14px;
-}
-
-/* Namensfelder */
-.training-page .friend-field input {
-    width: 100%;
-    margin: 0;
-}
-
-/* ==========================================
-   SCHRITT 18.3 – PERSONENAUSWAHL
-   ========================================== */
-
-.training-page .active-person-section {
-    margin: 25px 0 20px;
-}
-
-.training-page .active-person-section h2 {
-    font-size: 18px;
-    margin-bottom: 14px;
-}
-
-/* Teilnehmer nebeneinander darstellen */
-.training-page #person-tabs {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-}
-
-/* Einzelner Teilnehmer */
-.training-page .person-tab {
-    flex-shrink: 0;
-    background: #1c2536;
-    color: #9ca3af;
-    border: 1px solid #374151;
-    border-radius: 12px;
-    padding: 12px 20px;
-}
-
-/* Aktuell ausgewählte Person */
-.training-page .person-tab.active {
-    background: #5044c7;
-    color: white;
-    border-color: #818cf8;
-}
-
-/* ==========================================
-   MEHRPERSONEN-TRAINING IN DER HISTORIE
-   ========================================== */
-
-.history-person {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    padding: 15px;
-    margin-top: 15px;
-}
-
-.history-person h3 {
-    margin-top: 0;
-    color: #4338ca;
-}
-
-.history-person .history-exercise {
-    padding: 10px 0;
-    border-bottom: 1px solid #cbd5e1;
-}
-
-.history-person .history-exercise:last-child {
-    border-bottom: none;
-}
-
-/* ==========================================
-   STATISTIK – PERSONENAUSWAHL
-   ========================================== */
-
-#statistics-person-section {
-    margin: 25px 0;
-}
-
-#statistics-person-section h2 {
-    margin-bottom: 12px;
-}
-
-#statistics-person {
-    display: block;
-    width: 100%;
-    max-width: 350px;
-
-    margin-top: 10px;
-    padding: 12px;
-
-    background: white;
-    color: #222;
-
-    border: 1px solid #ccc;
-    border-radius: 8px;
-
-    font-size: 16px;
-}
-
-/* ==========================================
-   SCHRITT 18.7.1 – TEILNEHMER BESTÄTIGEN
-   ========================================== */
-
-.training-page #confirm-participants {
-    display: block;
-    width: 100%;
-    margin-top: 20px;
+    min-height: 48px;
+    margin: 12px 0;
     padding: 14px;
-
-    background: #5044c7;
-    color: white;
+    border-radius: var(--radius-medium);
+    font-size: 15px;
+    font-weight: 600;
 }
-
+.training-page #confirm-participants,
+.training-page #save-workout {
+    background: var(--color-primary);
+    color: #ffffff;
+    border: 1px solid var(--color-primary);
+}
+.training-page #add-exercise,
+.training-page #new-workout {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+}
 .training-page #confirm-participants:disabled {
-    background: #24513f;
-    color: #bbf7d0;
-    cursor: default;
+    background: var(--color-surface-secondary);
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
 }
-
-/* Gesperrte Eingabefelder */
-.training-page .training-participants input:disabled,
-.training-page .training-participants select:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-}
-
-.training-page #participants-status {
-    color: #86efac;
+.training-page #save-workout:disabled { opacity: .6; }
+.training-page #participants-status,
+.training-page #save-status,
+.training-page #draft-status,
+.training-page #saved-count {
     font-size: 13px;
-    margin-top: 12px;
+    line-height: 1.5;
+}
+.training-page #draft-status,
+.training-page #saved-count {
+    margin-top: 16px;
+    color: var(--color-text-secondary);
+    text-align: center;
 }
 
-/* Abgeschlossenes Training */
-.training-page #save-workout:disabled {
-    background: #24513f;
-    color: #bbf7d0;
-    cursor: default;
-    opacity: 0.85;
-}
-
-/* ==========================================
-   TRAININGSKALENDER
-   ========================================== */
-
-.calendar-page {
-    max-width: 900px;
+/* 5. HISTORIE ============================================= */
+.history-page .history-main {
+    max-width: 760px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 24px 16px 100px;
 }
-
-.calendar-container {
-    margin-top: 30px;
+.history-page .history-header { margin-bottom: 32px; }
+.history-page .history-eyebrow {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
 }
-
-#calendar-days {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 20px;
+.history-page .history-header h1 {
+    margin: 8px 0;
+    color: var(--color-text);
+    font-size: 30px;
 }
-
-.calendar-day {
+.history-page .history-header > p:last-child {
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+.history-page #workout-history {
+    position: relative;
+    padding-left: 25px;
+    border-left: 2px solid var(--color-border);
+}
+.history-page .history-workout {
+    position: relative;
+    margin: 0 0 22px;
+    padding: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+    box-shadow: var(--card-shadow);
+}
+.history-page .history-workout::before {
+    content: "";
+    position: absolute;
+    left: -33px;
+    top: 22px;
+    width: 12px;
+    height: 12px;
+    background: var(--color-primary);
+    border: 3px solid var(--color-background);
+    border-radius: 50%;
+}
+.history-page .history-workout > summary {
+    padding: 20px 18px;
+    color: var(--color-text);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+}
+.history-page .history-workout > summary::-webkit-details-marker { display: none; }
+.history-page .history-workout > summary::after {
+    content: "⌄";
+    float: right;
+    color: var(--color-primary);
+    font-size: 22px;
+    line-height: 16px;
+}
+.history-page .history-workout[open] > summary::after { content: "⌃"; }
+.history-page .history-person {
+    margin: 14px 16px;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+}
+.history-page .history-person h3 { margin: 0 0 12px; color: var(--color-primary); }
+.history-page .history-exercise {
+    margin: 12px 16px;
+    padding: 16px;
+    background: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+}
+.history-page .history-exercise h4 { margin: 0 0 12px; color: var(--color-text); }
+.history-page .history-set {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
+    margin: 8px 0;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+.history-page .history-set span { color: var(--color-text); font-size: 13px; }
+.history-page .edit-set {
+    padding: 9px 12px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border: 0;
+    border-radius: var(--radius-small);
+}
+.history-page .delete-exercise-history,
+.history-page .delete-workout {
+    margin: 10px 0;
+    padding: 10px 14px;
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+}
+.history-page .delete-workout { margin: 12px 16px 18px; }
+.history-page .set-edit-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+.history-page .set-edit-form input {
+    width: 90px;
     min-width: 0;
-    aspect-ratio: 1;
-    border-radius: 10px;
-    background: #252525;
-    color: white;
+    padding: 10px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    font-size: 16px;
+}
+.history-page .set-edit-form button {
+    padding: 10px 12px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+}
+.history-page .set-edit-form button:first-of-type {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-primary);
 }
 
-.calendar-day.today {
-    background: #2563eb;
-    font-weight: bold;
+/* 6. KALENDER ============================================= */
+.calendar-body .calendar-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 110px;
 }
-
-@media (max-width: 600px) {
-    .calendar-page {
-        padding: 14px;
-    }
-
-    #calendar-days {
-        gap: 4px;
-    }
-
-    .calendar-day {
-        font-size: 13px;
-    }
+.calendar-body .calendar-page > h1 {
+    margin: 0 0 8px;
+    color: var(--color-text);
+    font-size: 30px;
 }
-
-/* ==========================================
-   KALENDER – MONAT UND WOCHENTAGE
-   ========================================== */
-
-.calendar-navigation {
+.calendar-body .calendar-page > p {
+    margin: 0 0 28px;
+    color: var(--color-text-secondary);
+}
+.calendar-body .calendar-container {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+    box-shadow: var(--card-shadow);
+}
+.calendar-body .calendar-navigation {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    margin-bottom: 24px;
 }
-
-.calendar-navigation h2 {
+.calendar-body #calendar-month {
     margin: 0;
+    color: var(--color-text);
     text-align: center;
     text-transform: capitalize;
+    font-size: 19px;
 }
-
-.calendar-navigation button {
-    background: #252525;
-    color: white;
-    border: 1px solid #444;
-    border-radius: 10px;
-    padding: 10px 16px;
-    cursor: pointer;
+.calendar-body #previous-month,
+.calendar-body #next-month {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: var(--color-surface-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    font-size: 20px;
 }
-
-.calendar-navigation button:hover {
-    background: #383838;
-}
-
-.calendar-weekdays {
+.calendar-body .calendar-weekdays,
+.calendar-body #calendar-days {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 24px;
-    text-align: center;
-    font-weight: bold;
+    gap: 6px;
 }
-
-.calendar-weekdays span {
-    min-width: 0;
+.calendar-body .calendar-weekdays { margin-bottom: 10px; text-align: center; }
+.calendar-body .calendar-weekdays span {
+    padding: 8px 0;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
 }
-
-/* ==========================================
-   TRAININGSTAGE IM KALENDER MARKIEREN
-   ========================================== */
-
-.calendar-day {
+.calendar-body .calendar-day {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 1;
+    padding: 4px 2px 12px;
+    background: transparent;
+    color: var(--color-text);
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+    font-size: 14px;
 }
-
-/* Grüner Punkt für absolvierte Trainings */
-.workout-marker {
+.calendar-body .calendar-day:hover { background: var(--color-surface-secondary); }
+.calendar-body .calendar-day.today {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-weight: 700;
+}
+.calendar-body .calendar-day.selected { border: 2px solid var(--color-primary); }
+.calendar-body .workout-marker {
     position: absolute;
     bottom: 5px;
     left: 50%;
     transform: translateX(-50%);
-
-    width: 7px;
-    height: 7px;
-
-    background: #22c55e;
+    width: 6px;
+    height: 6px;
+    background: var(--color-success);
     border-radius: 50%;
 }
-
-/* Aktueller Tag mit Trainingsmarkierung */
-.calendar-day.today .workout-marker {
-    background: #bbf7d0;
+.calendar-body #calendar-details {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+}
+.calendar-body #calendar-details-title {
+    margin: 0 0 16px;
+    color: var(--color-text);
+    font-size: 18px;
+}
+.calendar-body .calendar-workout {
+    margin-bottom: 12px;
+    padding: 16px;
+    background: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+}
+.calendar-body .calendar-workout h4 { margin: 0 0 12px; color: var(--color-primary); }
+.calendar-body .calendar-exercise-name {
+    margin: 14px 0 6px;
+    color: var(--color-text);
+    font-weight: 700;
+}
+.calendar-body .calendar-workout p {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
 }
 
-/* ==========================================
-   KALENDER – TRAININGSDETAILS
-   ========================================== */
-
-.calendar-day {
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
+/* 7. STATISTIK ============================================ */
+.statistics-page .statistics-header,
+.plan-create-page .plan-create-header {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 16px 0;
 }
-
-.calendar-day:hover {
-    filter: brightness(1.25);
+.statistics-page .statistics-eyebrow,
+.plan-create-page .plan-create-eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
 }
-
-#calendar-details {
-    margin-top: 28px;
+.statistics-page .statistics-header h1,
+.plan-create-page .plan-create-header h1 {
+    margin: 0 0 8px;
+    color: var(--color-text);
+    font-size: 30px;
+}
+.statistics-page .statistics-header > p:last-child,
+.plan-create-page .plan-create-header > p:last-child {
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+.statistics-page .statistics-main,
+.plan-create-page .plan-create-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 120px;
+}
+.statistics-page .statistics-main > section,
+.plan-create-page .plan-create-main > section {
+    margin-bottom: 16px;
     padding: 20px;
-    background: #252525;
-    color: white;
-    border-radius: 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+    box-shadow: var(--card-shadow);
+}
+.statistics-page .statistics-main h2,
+.plan-create-page .plan-create-main h2 {
+    margin: 0 0 14px;
+    color: var(--color-text);
+    font-size: 18px;
+}
+.statistics-page .statistics-main label,
+.plan-create-page .plan-create-main label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+.statistics-page .statistics-main select,
+.plan-create-page .plan-create-main input[type="text"] {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    background: var(--color-surface-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    font-size: 16px;
+}
+.statistics-page .statistics-main select:focus,
+.plan-create-page .plan-create-main input:focus {
+    border-color: var(--color-primary);
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+.statistics-page .stat-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 18px 0 24px;
+}
+.statistics-page .stat-tab {
+    min-height: 46px;
+    padding: 10px 8px;
+    background: var(--color-surface-secondary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    font-size: 13px;
+    font-weight: 600;
+}
+.statistics-page .stat-tab.active {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-primary);
+}
+.statistics-page #set-selection {
+    margin-bottom: 22px;
+    padding: 14px;
+    background: var(--color-surface-secondary);
+    border-radius: var(--radius-medium);
+}
+.statistics-page .stat-hint {
+    margin: 12px 0 0;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.statistics-page #chart-title {
+    margin: 0 0 8px;
+    color: var(--color-text);
+    font-size: 19px;
+}
+.statistics-page #chart-description {
+    margin: 0 0 20px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+}
+.statistics-page #chart-container {
+    min-width: 0;
+    width: 100%;
+    overflow-x: auto;
+    margin: 20px 0 0;
+    padding: 15px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+}
+.statistics-page #chart-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+.statistics-page #chart-container svg text { fill: var(--color-text-secondary); }
+.statistics-page #chart-container svg text[font-weight="bold"] {
+    fill: var(--color-primary);
+}
+.statistics-page #chart-container details {
+    border-top: 1px solid var(--color-border);
+    padding-top: 14px;
+    font-size: 13px;
+}
+.statistics-page #chart-container details li { margin: 6px 0; }
+.statistics-page #statistics-status {
+    color: var(--color-text-secondary);
+    font-size: 13px;
 }
 
-/* Versteckte Details müssen unsichtbar bleiben */
-#calendar-details[hidden] {
-    display: none;
+/* 8. TRAININGSPLÄNE ERSTELLEN ============================== */
+.plan-create-page #plan-exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
 }
-
-#calendar-details h3 {
-    margin-top: 0;
+.plan-create-page .plan-exercise {
+    padding: 14px;
+    background: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
 }
-
-.calendar-workout {
-    padding: 15px 0;
-    border-bottom: 1px solid #444;
+.plan-create-page .plan-exercise input { margin-bottom: 10px; }
+.plan-create-page .remove-plan-exercise {
+    min-height: 40px;
+    padding: 9px 14px;
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    font-weight: 500;
 }
-
-.calendar-workout:last-child {
-    border-bottom: none;
+.plan-create-page #add-plan-exercise {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+    font-size: 15px;
+    font-weight: 600;
 }
-
-.calendar-workout h4 {
-    margin-bottom: 10px;
-    color: #86efac;
-}
-
-.calendar-exercise-name {
-    font-weight: bold;
-    margin-top: 14px;
-}
-
-.calendar-workout p {
-    margin-bottom: 6px;
-}
-/* ==========================================
-   AUSGEWÄHLTER KALENDERTAG
-   ========================================== */
-
-.calendar-day.selected {
-    outline: 2px solid #22c55e;
-    outline-offset: -2px;
-}
-
-/* Heute bleibt auch bei Auswahl blau */
-.calendar-day.today.selected {
-    background: #2563eb;
-    outline: 2px solid #22c55e;
-}
-
-/* Button zum Starten eines neuen Trainings */
-
-.training-page #new-workout[hidden] {
-    display: none;
-}
-
-.training-page #new-workout {
-    margin-top: 12px;
-    padding: 12px 20px;
-    border-radius: 10px;
-    background: #2563eb;
-    color: white;
+.plan-create-page #save-plan {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px;
+    background: var(--color-primary);
+    color: #ffffff;
     border: none;
-    cursor: pointer;
+    border-radius: var(--radius-medium);
+    font-size: 16px;
+    font-weight: 600;
+}
+.plan-create-page #save-plan:disabled { opacity: .5; }
+.plan-create-page #plan-status {
+    margin-top: 14px;
+    color: var(--color-danger);
+    font-size: 13px;
 }
 
-.training-page #new-workout:hover {
-    background: #1d4ed8;
+/* 9. MEHR ================================================= */
+.more-page .more-main {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 32px 20px 100px;
+}
+.more-page .more-header h1 { margin: 0 0 8px; font-size: 30px; }
+.more-page .more-header p { margin: 0; color: var(--color-text-secondary); }
+.more-page .more-section { margin-top: 32px; }
+.more-page .more-section h2 {
+    margin-bottom: 12px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.more-page .more-links,
+.more-page .more-settings {
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+}
+.more-page .more-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
+    font-weight: 500;
+}
+.more-page .more-link:last-child { border-bottom: 0; }
+.more-page .more-link:hover { background: var(--color-surface-secondary); }
+.more-page .more-link span:first-child {
+    width: 28px;
+    color: var(--color-primary);
+    text-align: center;
+    font-size: 23px;
+}
+.more-page .more-link span:last-child {
+    margin-left: auto;
+    color: var(--color-text-secondary);
+}
+.more-page #theme-toggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    background: transparent;
+    color: var(--color-text);
+    border: 0;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 500;
+}
+.more-page #theme-toggle:hover { background: var(--color-surface-secondary); }
+.more-page #theme-icon { width: 28px; text-align: center; font-size: 22px; }
+
+/* 10. DATENSICHERUNG ====================================== */
+.backup-page > header {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 12px 20px 0;
+}
+.backup-page > header h1 { margin: 12px 0 8px; font-size: 30px; }
+.backup-page > header p { color: var(--color-text-secondary); }
+.backup-page main {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 32px 20px 70px;
+}
+.backup-page main h2 { margin: 0 0 10px; color: var(--color-text); font-size: 19px; }
+.backup-page main p { color: var(--color-text-secondary); line-height: 1.6; }
+.backup-page .backup-card,
+.backup-page #import-section {
+    margin-top: 20px;
+    padding: 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+}
+.backup-page input[type="file"] {
+    display: block;
+    width: 100%;
+    margin: 15px 0;
+    padding: 12px;
+    background: var(--color-surface-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+}
+.backup-page main button {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 16px;
+    padding: 12px 18px;
+    background: var(--color-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-medium);
+    font-size: 15px;
+    font-weight: 600;
+}
+.backup-page main button:hover { background: var(--color-primary-hover); }
+.backup-page #theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    margin: 16px 20px 0 auto;
+    padding: 10px 16px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    font-size: 14px;
+}
+.backup-page #theme-toggle:hover { background: var(--color-surface-secondary); }
+
+/* 11. SMARTPHONE ========================================== */
+@media (max-width: 600px) {
+    .home-page .home-header { padding: 18px; }
+    .home-page .home-main {
+        padding: 20px 16px calc(120px + env(safe-area-inset-bottom));
+    }
+    .home-page .home-welcome h1 { font-size: 30px; line-height: 1.2; }
+    .home-page .free-workout-card { min-height: 175px; padding: 20px; }
+    .home-page .dashboard-card { padding: 16px; }
+    .home-page #saved-plans { grid-template-columns: 1fr; gap: 12px; }
+    .home-page #saved-plans .plan-card { padding: 16px; }
+
+    .training-page .training-main { padding: 20px 14px 110px; }
+    .training-page .training-intro h1 { font-size: 26px; }
+    .training-page .training-participants,
+    .training-page .active-person-section { padding: 16px; }
+    .training-page .exercise { padding: 14px; }
+    .training-page .exercise legend { font-size: 16px; }
+    .training-page #exercises { gap: 12px; }
+    .training-page .set { padding: 12px; }
+    .training-page .set-inputs { gap: 8px; }
+
+    .history-page .history-header h1 { font-size: 26px; }
+    .history-page .history-main { padding: 20px 14px 100px; }
+    .history-page #workout-history { padding-left: 18px; }
+    .history-page .history-workout::before { left: -26px; }
+    .history-page .history-exercise { margin: 10px; padding: 12px; }
+
+    .calendar-body .calendar-page { padding: 20px 12px 110px; }
+    .calendar-body .calendar-container { padding: 12px; }
+    .calendar-body #calendar-days,
+    .calendar-body .calendar-weekdays { gap: 3px; }
+    .calendar-body .calendar-day { font-size: 13px; }
+    .calendar-body .calendar-page > h1 { font-size: 26px; }
+
+    .statistics-page .statistics-header,
+    .plan-create-page .plan-create-header { padding: 20px 14px 0; }
+    .statistics-page .statistics-header h1,
+    .plan-create-page .plan-create-header h1 { font-size: 26px; }
+    .statistics-page .statistics-main,
+    .plan-create-page .plan-create-main { padding: 20px 14px 120px; }
+    .statistics-page .statistics-main > section,
+    .plan-create-page .plan-create-main > section { padding: 16px; }
+    .statistics-page .stat-tabs { gap: 6px; }
+    .statistics-page .stat-tab { padding: 10px 5px; font-size: 12px; }
+
+    .more-page .more-main { padding: 24px 16px 100px; }
+    .backup-page > header { padding: 12px 16px 0; }
+    .backup-page main { padding: 24px 16px 60px; }
+    .backup-page > header h1 { font-size: 26px; }
+    .backup-page .backup-card,
+    .backup-page #import-section { padding: 18px; }
+}
+
+@media (max-width: 380px) {
+    .home-navigation { padding-left: 4px; padding-right: 4px; }
+    .home-navigation a { font-size: 10px; }
+}
+@media (max-width: 360px) {
+    .home-page .dashboard-grid { gap: 10px; }
+    .home-page .dashboard-card { padding: 14px; }
+    .home-page .dashboard-card strong { font-size: 28px; }
+    .training-page .set-inputs { gap: 6px; }
+    .training-page .set-field input { padding: 10px 6px; }
 }

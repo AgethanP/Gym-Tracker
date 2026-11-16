@@ -17,7 +17,17 @@
     <script src="backup.js" defer></script>
 </head>
 
-<body>
+<body class="backup-page">
+
+    <!-- ==========================================
+        LIGHT-/DARK-MODE UMSCHALTER
+        ========================================== -->
+
+    <button type="button" id="theme-toggle"
+            aria-label="Farbschema wechseln">
+        <span id="theme-icon" aria-hidden="true">🌙</span>
+        <span id="theme-label">Dark Mode</span>
+    </button>
 
     <header>
         <h1>Datensicherung</h1>
@@ -25,8 +35,8 @@
     </header>
 
     <main>
-
-        <section>
+        
+        <section class="backup-card">
             <h2>Backup erstellen</h2>
 
             <p>
@@ -73,12 +83,12 @@
             <p id="import-status" role="status"></p>
 
         </section>
-
-        <nav>
-            <a href="index.html">← Zur Startseite</a>
-        </nav>
-
     </main>
+    
+<!-- Gemeinsames Farbschema und Navigation -->
+<script src="theme.js"></script>
+<script src="navigation.js"></script>
 
 </body>
+
 </html>

@@ -37,13 +37,12 @@
         <section class="home-welcome">
             <p class="home-eyebrow">YOUR FITNESS JOURNEY</p>
 
-            <h1>Ready to train?</h1>
+            <h1>Bereit für ein Training?</h1>
 
             <p>
                 Dein Training. Dein Fortschritt. Dein Ziel.
             </p>
         </section>
-
         <!-- Freies Training starten -->
         <section class="home-start">
 
@@ -70,6 +69,45 @@
 
         </section>
 
+        <!-- ==========================================
+            DASHBOARD – TRAININGSÜBERSICHT
+            ========================================== -->
+
+        <section class="home-dashboard">
+
+            <h2>Dein Fortschritt</h2>
+
+            <div class="dashboard-grid">
+
+                <!-- Trainings der aktuellen Woche -->
+                <article class="dashboard-card">
+
+                    <span class="dashboard-card-icon" aria-hidden="true">
+                        ◷
+                    </span>
+
+                    <strong id="weekly-workouts">0</strong>
+
+                    <span>Trainings diese Woche</span>
+
+                </article>
+
+                <!-- Alle bisher gespeicherten Trainings -->
+                <article class="dashboard-card">
+
+                    <span class="dashboard-card-icon" aria-hidden="true">
+                        ▥
+                    </span>
+
+                    <strong id="total-workouts">0</strong>
+
+                    <span>Trainings insgesamt</span>
+
+                </article>
+
+            </div>
+
+        </section>
         <!-- Gespeicherte Trainingspläne -->
         <section class="home-plans">
 
@@ -90,39 +128,8 @@
 
     </main>
 
-    <!-- Navigation -->
-    <nav class="home-navigation">
-
-        <a href="index.html" class="active">
-            <span class="nav-icon">⌂</span>
-            <span>Home</span>
-        </a>
-
-        <a href="training.html">
-            <span class="nav-icon">＋</span>
-            <span>Training</span>
-        </a>
-
-        <a href="history.html">
-            <span class="nav-icon">◷</span>
-            <span>Historie</span>
-        </a>
-
-        <a href="statistics.html">
-            <span class="nav-icon">▥</span>
-            <span>Statistik</span>
-        </a>
-
-        <a href="backup.html">
-            <span class="nav-icon">⇩</span>
-            <span>Backup</span>
-        </a>              
-        <!-- Trainingskalender öffnen -->
-        <a href="calendar.html">
-            <span class="nav-icon">📅</span>
-            <span>Kalender</span>
-        </a>
-    </nav>
-
+<script src="theme.js"></script>
+<!-- Einheitliche Navigation automatisch einfügen -->
+<script src="navigation.js"></script>
 </body>
 </html>

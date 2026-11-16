@@ -1,9 +1,9 @@
-
 // ==========================================
-// GYM TRACKER - STATISTIKEN
+// GYM TRACKER – TRAININGSSTATISTIKEN
 // ==========================================
 
-// HTML-Elemente auswählen
+// Vorhandene HTML-Elemente verwenden.
+const statisticsPersonSelect = document.getElementById("statistics-person");
 const exerciseSelect = document.getElementById("exercise-select");
 const chartContainer = document.getElementById("chart-container");
 const chartTitle = document.getElementById("chart-title");
@@ -11,890 +11,539 @@ const chartDescription = document.getElementById("chart-description");
 const statisticsStatus = document.getElementById("statistics-status");
 const setSelection = document.getElementById("set-selection");
 const setNumberSelect = document.getElementById("set-number");
+const statTabs = document.querySelectorAll(".stat-tab");
 
-
-// Aktuell ausgewählte Statistik
 let activeStatistic = "max";
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 // ==========================================
-// ÜBUNGEN DER AUSGEWÄHLTEN PERSON LADEN
+// HILFSFUNKTIONEN
 // ==========================================
 
-function loadStatisticsExercises() {
+function normalizeStatisticsName(name) {
+    return typeof name === "string" ? name.trim().toLocaleLowerCase("de-DE") : "";
+}
 
-    // Bisherige Auswahl entfernen
-    exerciseSelect.replaceChildren();
+function formatStatisticsValue(value) {
+    return Number(value).toLocaleString("de-DE", {
+        maximumFractionDigits: 2
+    });
+}
 
-    // Standardoption hinzufügen
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = "Übung auswählen";
+function formatStatisticsDate(date) {
+    return new Date(date).toLocaleDateString("de-DE");
+}
 
-    exerciseSelect.appendChild(defaultOption);
+function isValidStatisticsSet(set) {
+    return set && Number.isFinite(set.weight) && set.weight >= 0 &&
+        Number.isInteger(set.reps) && set.reps >= 1;
+}
 
-    // Nur die Trainings der gewählten Person laden
-    const workouts = getPersonWorkouts();
+function createSVGElement(tag, attributes = {}, text = null) {
+    const element = document.createElementNS(SVG_NS, tag);
 
-    // Übungsnamen ohne Duplikate sammeln
-    const exerciseNames = new Set();
+    for (const [name, value] of Object.entries(attributes)) {
+        element.setAttribute(name, String(value));
+    }
 
-    for (const workout of workouts) {
+    if (text !== null) {
+        element.textContent = String(text);
+    }
 
-        for (const exercise of workout.exercises) {
+    return element;
+}
 
-            const name = exercise.name.trim();
+// ==========================================
+// PERSONEN EINMAL BEIM START LADEN
+// ==========================================
 
-            if (name === "") {
-                continue;
-            }
+function loadStatisticsPersons() {
+    const previousPerson = statisticsPersonSelect.value;
+    const names = new Map([["ich", "Ich"]]);
 
-            // Groß- und Kleinschreibung ignorieren
-            const exists = [...exerciseNames].some(
-                savedName =>
-                    savedName.toLowerCase() === name.toLowerCase()
-            );
+    for (const workout of loadWorkouts()) {
+        if (!Array.isArray(workout?.participants)) {
+            continue;
+        }
 
-            if (!exists) {
-                exerciseNames.add(name);
+        for (const person of workout.participants) {
+            const name = typeof person?.name === "string" ? person.name.trim() : "";
+            const key = normalizeStatisticsName(name);
+
+            if (key && !names.has(key)) {
+                names.set(key, name);
             }
         }
     }
 
-    // Alphabetisch sortieren
-    const sortedNames = [...exerciseNames].sort(
-        (a, b) => a.localeCompare(b, "de")
-    );
+    statisticsPersonSelect.replaceChildren();
 
-    // Übungen in die Auswahlliste einfügen
-    for (const name of sortedNames) {
-
+    for (const name of names.values()) {
         const option = document.createElement("option");
-
         option.value = name;
         option.textContent = name;
-
-        exerciseSelect.appendChild(option);
+        statisticsPersonSelect.appendChild(option);
     }
+
+    const oldKey = normalizeStatisticsName(previousPerson);
+    const oldName = names.get(oldKey);
+    statisticsPersonSelect.value = oldName || "Ich";
 }
 
-
 // ==========================================
-// TRAININGSDATEN EINER PERSON LADEN
+// TRAININGSVERLAUF DER GEWÄHLTEN PERSON
 // ==========================================
 
 function getPersonWorkouts() {
-
-    // Aktuell ausgewählte Person auslesen
-    const selectedPerson =
-        document.getElementById("statistics-person").value;
-
-    const workouts = loadWorkouts();
+    const selectedPerson = normalizeStatisticsName(statisticsPersonSelect.value);
     const results = [];
 
-    for (const workout of workouts) {
+    for (const workout of loadWorkouts()) {
+        if (!workout || !Number.isFinite(Date.parse(workout.date))) {
+            continue;
+        }
+
+        let personExercises = null;
 
         if (Array.isArray(workout.participants)) {
-
-            // Bei Gruppentrainings die ausgewählte Person suchen
-            const person = workout.participants.find(
-                participant => participant.name === selectedPerson
+            const person = workout.participants.find(item =>
+                normalizeStatisticsName(item?.name) === selectedPerson
             );
 
-            // Nur Trainings übernehmen, an denen sie teilgenommen hat
             if (person) {
-                results.push({
-                    date: workout.date,
-                    exercises: person.exercises || []
-                });
+                personExercises = person.exercises;
             }
+        } else if (selectedPerson === "ich") {
+            // Ältere Einzeltrainings gehören immer zu "Ich".
+            personExercises = workout.exercises;
+        }
 
-        } else if (selectedPerson === "Ich") {
-
-            // Alte Einzeltrainings gehören nur zu "Ich"
+        if (Array.isArray(personExercises)) {
             results.push({
                 date: workout.date,
-                exercises: workout.exercises || []
+                exercises: personExercises
             });
         }
     }
 
-    return results;
+    return results.sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
 // ==========================================
-// FUNKTION: MAXIMALES GEWICHT BERECHNEN
+// ÜBUNGEN DER GEWÄHLTEN PERSON ANZEIGEN
 // ==========================================
 
-function getMaxWeightData(exerciseName) {
+function loadStatisticsExercises() {
+    const previousExercise = normalizeStatisticsName(exerciseSelect.value);
+    const names = new Map();
 
-    // Nur Trainings der ausgewählten Person verwenden
-    const workouts = getPersonWorkouts();
+    for (const workout of getPersonWorkouts()) {
+        for (const exercise of workout.exercises) {
+            const name = typeof exercise?.name === "string" ? exercise.name.trim() : "";
+            const key = normalizeStatisticsName(name);
 
-    // Hier sammeln wir unsere Diagrammdaten
-    const results = [];
-
-    // Trainings chronologisch sortieren
-    const sortedWorkouts = [...workouts].sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-    );
-
-    for (const workout of sortedWorkouts) {
-
-        // Passende Übungen im Training finden
-        const matchingExercises = workout.exercises.filter(
-            exercise =>
-                exercise.name.trim().toLowerCase() ===
-                exerciseName.trim().toLowerCase()
-        );
-
-        if (matchingExercises.length === 0) {
-            continue;
-        }
-
-        // Gewichte aller passenden Sätze sammeln
-        const weights = matchingExercises.flatMap(
-            exercise => exercise.sets.map(set => set.weight)
-        );
-
-        if (weights.length === 0) {
-            continue;
-        }
-
-        // Höchstes verwendetes Gewicht ermitteln
-        const maxWeight = Math.max(...weights);
-
-        results.push({
-            date: workout.date,
-            weight: maxWeight
-        });
-    }
-
-    return results;
-}
-
-
-// ==========================================
-// FUNKTION: GEWICHT EINES BESTIMMTEN SATZES
-// ==========================================
-
-function getSetWeightData(exerciseName, setNumber) {
-
-    // Nur Trainings der ausgewählten Person verwenden
-    const workouts = getPersonWorkouts();
-
-    // Liste für unsere Ergebnisse
-    const results = [];
-
-    // Satznummer in Array-Index umwandeln
-    // Satz 1 = Index 0, Satz 2 = Index 1
-    const setIndex = setNumber - 1;
-
-    // Trainings nach Datum sortieren
-    const sortedWorkouts = [...workouts].sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-    );
-
-    // Alle Trainings durchgehen
-    for (const workout of sortedWorkouts) {
-
-        // Gesuchte Übung finden
-        const exercise = workout.exercises.find(
-            item =>
-                item.name.trim().toLowerCase() ===
-                exerciseName.trim().toLowerCase()
-        );
-
-        // Falls Übung nicht vorhanden, überspringen
-        if (!exercise) {
-            continue;
-        }
-
-        // Gewünschten Satz auswählen
-        const set = exercise.sets[setIndex];
-
-        // Falls dieser Satz nicht existiert, überspringen
-        if (!set) {
-            continue;
-        }
-
-        // Gewicht und Datum speichern
-        results.push({
-            date: workout.date,
-            weight: set.weight
-        });
-    }
-
-    return results;
-}
-
-// ==========================================
-// FUNKTION: WIEDERHOLUNGEN EINES SATZES LADEN
-// ==========================================
-
-function getRepetitionData(exerciseName, setNumber) {
-
-    // Nur Trainings der ausgewählten Person verwenden
-    const workouts = getPersonWorkouts();
-
-    // Liste für unsere Ergebnisse
-    const results = [];
-
-    // Satznummer in einen Array-Index umwandeln
-    // Beispiel: Satz 2 = Index 1
-    const setIndex = setNumber - 1;
-
-    // Trainingseinheiten chronologisch sortieren
-    const sortedWorkouts = [...workouts].sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-    );
-
-    // Jede Trainingseinheit durchgehen
-    for (const workout of sortedWorkouts) {
-
-        // Passende Übung suchen
-        const exercise = workout.exercises.find(
-            item =>
-                item.name.trim().toLowerCase() ===
-                exerciseName.trim().toLowerCase()
-        );
-
-        // Training überspringen, wenn die Übung fehlt
-        if (!exercise) {
-            continue;
-        }
-
-        // Gewünschten Satz auswählen
-        const set = exercise.sets[setIndex];
-
-        // Training überspringen, wenn dieser Satz fehlt
-        if (!set) {
-            continue;
-        }
-
-        // Datum, Wiederholungen und Gewicht merken
-        results.push({
-            date: workout.date,
-            weight: set.reps,
-            actualWeight: set.weight
-        });
-    }
-
-    return results;
-}
-
-// ==========================================
-// FUNKTION: TRAININGSVOLUMEN BERECHNEN
-// ==========================================
-
-function getVolumeData(exerciseName) {
-
-    // Nur Trainings der ausgewählten Person verwenden
-    const workouts = getPersonWorkouts();
-
-    // Hier sammeln wir die Ergebnisse fürs Diagramm
-    const results = [];
-
-    // Trainings chronologisch sortieren
-    const sortedWorkouts = [...workouts].sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-    );
-
-    // Jede Trainingseinheit einzeln auswerten
-    for (const workout of sortedWorkouts) {
-
-        // Alle Übungen mit dem gesuchten Namen finden
-        const matchingExercises = workout.exercises.filter(
-            exercise =>
-                exercise.name.trim().toLowerCase() ===
-                exerciseName.trim().toLowerCase()
-        );
-
-        // Training überspringen, wenn die Übung nicht vorkam
-        if (matchingExercises.length === 0) {
-            continue;
-        }
-
-        // Gesamtvolumen zunächst auf 0 setzen
-        let totalVolume = 0;
-
-        // Alle passenden Übungen und ihre Sätze durchgehen
-        for (const exercise of matchingExercises) {
-
-            for (const set of exercise.sets) {
-
-                // Satzvolumen = Gewicht × Wiederholungen
-                const setVolume = set.weight * set.reps;
-
-                // Zum bisherigen Gesamtvolumen addieren
-                totalVolume += setVolume;
+            if (key && !names.has(key)) {
+                names.set(key, name);
             }
         }
-
-        // Ergebnis für diese Trainingseinheit speichern
-        results.push({
-            date: workout.date,
-            weight: Number(totalVolume.toFixed(2))
-        });
     }
 
-    return results;
+    exerciseSelect.replaceChildren();
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Übung auswählen";
+    exerciseSelect.appendChild(placeholder);
+
+    const sortedNames = [...names.values()].sort((a, b) =>
+        a.localeCompare(b, "de-DE")
+    );
+
+    for (const name of sortedNames) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        exerciseSelect.appendChild(option);
+    }
+
+    // Eine Übung nur beibehalten, wenn die neue Person sie auch trainiert hat.
+    exerciseSelect.value = names.get(previousExercise) || "";
 }
 
-
-
-function drawChart(data) {
-
-    // Vorheriges Diagramm entfernen
-    chartContainer.replaceChildren();
-
-    if (data.length === 0) {
-        statisticsStatus.textContent =
-            "Keine Trainingsdaten vorhanden.";
-        return;
-    }
-
-    statisticsStatus.textContent = "";
-
-    // ==========================================
-    // EINHEIT DER AKTUELLEN STATISTIK
-    // ==========================================
-
-    
-    // Einheit passend zur ausgewählten Statistik festlegen
-    const unit = activeStatistic === "reps"
-        ? "Wdh."
-        : "kg";
-
-
-    // ==========================================
-    // 1. GRÖSSE UND ABSTÄNDE
-    // ==========================================
-
-    const width = 650;
-    const height = 350;
-
-    // Platz für Achsenbeschriftungen reservieren
-    const left = 65;
-    const right = 30;
-    const top = 35;
-    const bottom = 65;
-
-    const plotWidth = width - left - right;
-    const plotHeight = height - top - bottom;
-
-    const svgNS = "http://www.w3.org/2000/svg";
-
-    const svg = document.createElementNS(svgNS, "svg");
-    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", "Gewichtsentwicklung nach Datum");
-
-    // Hilfsfunktion: SVG-Element mit Attributen erstellen
-    function createSVGElement(tag, attributes) {
-
-        const element = document.createElementNS(svgNS, tag);
-
-        for (const [key, value] of Object.entries(attributes)) {
-            element.setAttribute(key, value);
-        }
-
-        return element;
-    }
-
-    // ==========================================
-    // 2. WERTEBEREICH BERECHNEN
-    // ==========================================
-
-    const values = data.map(item => item.weight);
-
-    const minWeight = Math.min(...values);
-    const maxWeight = Math.max(...values);
-
-    // Etwas Abstand oberhalb und unterhalb der Werte
-    const lowerBound = Math.max(0, minWeight - 5);
-    const upperBound = maxWeight + 5;
-    const range = upperBound - lowerBound;
-
-    // Gewicht in eine Y-Koordinate umrechnen
-    function getY(weight) {
-        return top + (upperBound - weight) / range * plotHeight;
-    }
-
-    // ==========================================
-    // 3. Y-ACHSE MIT GEWICHTEN ZEICHNEN
-    // ==========================================
-
-    // Fünf Beschriftungen in gleichen Abständen
-    for (let i = 0; i <= 4; i++) {
-
-        const weight = lowerBound + (range / 4) * i;
-        const y = getY(weight);
-
-        // Horizontale Hilfslinie
-        const gridLine = createSVGElement("line", {
-            x1: left,
-            y1: y,
-            x2: width - right,
-            y2: y,
-            stroke: "#e5e7eb",
-            "stroke-width": 1
-        });
-
-        svg.appendChild(gridLine);
-
-        // Gewichtsbeschriftung
-        const label = createSVGElement("text", {
-            x: left - 12,
-            y: y + 4,
-            "text-anchor": "end",
-            "font-size": 12,
-            fill: "#555"
-        });
-
-        // Wiederholungen als ganze Zahlen darstellen
-        label.textContent = activeStatistic === "reps"
-            ? `${Math.round(weight)} Wdh.`
-            : `${Number(weight.toFixed(1)).toLocaleString("de-DE")} kg`;
-
-
-        svg.appendChild(label);
-    }
-
-    // ==========================================
-    // 4. MESSPUNKTE BERECHNEN
-    // ==========================================
-
-    const points = data.map(function(item, index) {
-
-        const x = data.length === 1
-            ? left + plotWidth / 2
-            : left + index * plotWidth / (data.length - 1);
-        return {
-            x: x,
-            y: getY(item.weight),
-            date: item.date,
-            weight: item.weight,
-
-            // Tatsächliches Trainingsgewicht,
-            // falls die Statistik Wiederholungen zeigt
-            actualWeight: item.actualWeight
-        };
-    });
-
-    // ==========================================
-    // 5. VERBINDUNGSLINIE ZEICHNEN
-    // ==========================================
-
-    const line = createSVGElement("polyline", {
-        points: points.map(p => `${p.x},${p.y}`).join(" "),
-        fill: "none",
-        stroke: "#2563eb",
-        "stroke-width": 3,
-        "stroke-linejoin": "round"
-    });
-
-    svg.appendChild(line);
-
-    // ==========================================
-    // 6. MESSPUNKTE UND BESCHRIFTUNGEN
-    // ==========================================
-
-    // Bei vielen Trainings nur ausgewählte Datumsangaben anzeigen
-    const labelStep = Math.max(1, Math.ceil(data.length / 6));
-
-    points.forEach(function(point, index) {
-
-        // Blauer Messpunkt
-        const circle = createSVGElement("circle", {
-            cx: point.x,
-            cy: point.y,
-            r: 5,
-            fill: "#2563eb"
-        });
-
-        // Tooltip bei Mausberührung
-        const tooltip = createSVGElement("title", {});
-
-        const dateText = new Date(point.date)
-            .toLocaleDateString("de-DE");
-
-        
-        // Tooltip abhängig vom Statistik-Reiter anzeigen
-        if (activeStatistic === "reps") {
-
-            tooltip.textContent =
-                `${dateText}: ${point.weight} Wiederholungen ` +
-                `bei ${point.actualWeight} kg`;
-
-        } else if (activeStatistic === "volume") {
-
-            tooltip.textContent =
-                `${dateText}: ${point.weight} kg Trainingsvolumen`;
-
-        } else {
-
-            tooltip.textContent =
-                `${dateText}: ${point.weight} kg`;
-        }
-
-
-        circle.appendChild(tooltip);
-        svg.appendChild(circle);
-
-        // Gewicht direkt über dem Messpunkt anzeigen
-        const weightLabel = createSVGElement("text", {
-            x: point.x,
-            y: point.y - 12,
-            "text-anchor": "middle",
-            "font-size": 12,
-            "font-weight": "bold",
-            fill: "#1d4ed8"
-        });
-
-        // Wert mit der passenden Einheit anzeigen
-        weightLabel.textContent = `${point.weight} ${unit}`;
-
-        svg.appendChild(weightLabel);
-
-        // Datum unter dem Diagramm anzeigen
-        if (
-            index % labelStep === 0 ||
-            index === points.length - 1
-        ) {
-
-            const dateLabel = createSVGElement("text", {
-                x: point.x,
-                y: height - bottom + 25,
-                "text-anchor": "middle",
-                "font-size": 11,
-                fill: "#555"
-            });
-
-            dateLabel.textContent = new Date(point.date)
-                .toLocaleDateString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit"
-                });
-
-            svg.appendChild(dateLabel);
-        }
-    });
-
-    // ==========================================
-    // 7. FERTIGES DIAGRAMM ANZEIGEN
-    // ==========================================
-
-    chartContainer.appendChild(svg);
-}
-
-
 // ==========================================
-// FUNKTION: VERFÜGBARE SATZNUMMERN ANZEIGEN
+// VERFÜGBARE SATZNUMMERN ANZEIGEN
 // ==========================================
 
-function updateSetSelection(exerciseName) {
-
-    // Bisherige Auswahl merken
+function updateSetSelection(exerciseName, workouts) {
     const previousValue = setNumberSelect.value;
-
-    // Alte Optionen entfernen
-    setNumberSelect.replaceChildren();
-
-    // Höchste Satzanzahl dieser Übung ermitteln
+    const key = normalizeStatisticsName(exerciseName);
     let maxSets = 0;
 
-    // Nur Trainings der ausgewählten Person verwenden
-    const workouts = getPersonWorkouts();
-
     for (const workout of workouts) {
-
         for (const exercise of workout.exercises) {
-
-            if (
-                exercise.name.trim().toLowerCase() ===
-                exerciseName.trim().toLowerCase()
-            ) {
+            if (normalizeStatisticsName(exercise?.name) === key &&
+                Array.isArray(exercise.sets)) {
                 maxSets = Math.max(maxSets, exercise.sets.length);
             }
         }
     }
 
-    // Für jede Satznummer eine Auswahl erstellen
-    for (let i = 1; i <= maxSets; i++) {
+    setNumberSelect.replaceChildren();
 
+    for (let number = 1; number <= maxSets; number++) {
         const option = document.createElement("option");
-
-        option.value = i;
-        option.textContent = `Satz ${i}`;
-
+        option.value = String(number);
+        option.textContent = `Satz ${number}`;
         setNumberSelect.appendChild(option);
     }
 
-    // Bisherige Auswahl beibehalten, wenn möglich
-    if (
-        [...setNumberSelect.options].some(
-            option => option.value === previousValue
-        )
-    ) {
+    if ([...setNumberSelect.options].some(option => option.value === previousValue)) {
         setNumberSelect.value = previousValue;
     }
+
+    return maxSets;
 }
 
 // ==========================================
-// FUNKTION: STATISTIK AKTUALISIEREN
+// VIER STATISTIKARTEN BERECHNEN
+// ==========================================
+
+function calculateStatisticsData(workouts, exerciseName, statistic, setNumber) {
+    const key = normalizeStatisticsName(exerciseName);
+    const results = [];
+    const setIndex = setNumber - 1;
+
+    for (const workout of workouts) {
+        const matchingExercises = workout.exercises.filter(exercise =>
+            normalizeStatisticsName(exercise?.name) === key &&
+            Array.isArray(exercise.sets)
+        );
+
+        if (matchingExercises.length === 0) {
+            continue;
+        }
+
+        let value;
+        let actualWeight;
+
+        if (statistic === "max") {
+            const weights = matchingExercises.flatMap(exercise =>
+                exercise.sets.filter(isValidStatisticsSet).map(set => set.weight)
+            );
+
+            if (weights.length === 0) {
+                continue;
+            }
+            value = Math.max(...weights);
+
+        } else if (statistic === "volume") {
+            const sets = matchingExercises.flatMap(exercise =>
+                exercise.sets.filter(isValidStatisticsSet)
+            );
+
+            if (sets.length === 0) {
+                continue;
+            }
+            value = Number(sets.reduce((sum, set) =>
+                sum + set.weight * set.reps, 0
+            ).toFixed(2));
+
+        } else if (statistic === "set" || statistic === "reps") {
+            // Dieselbe Satzposition aus den verschiedenen Trainings vergleichen.
+            const exercise = matchingExercises.find(item =>
+                isValidStatisticsSet(item.sets[setIndex])
+            );
+
+            if (!exercise) {
+                continue;
+            }
+
+            const set = exercise.sets[setIndex];
+            value = statistic === "reps" ? set.reps : set.weight;
+            actualWeight = set.weight;
+
+        } else {
+            continue;
+        }
+
+        results.push({ date: workout.date, value, actualWeight });
+    }
+
+    return results;
+}
+
+// ==========================================
+// DIAGRAMM ZEICHNEN
+// ==========================================
+
+function drawChart(data) {
+    chartContainer.replaceChildren();
+
+    if (data.length === 0) {
+        statisticsStatus.textContent = "Keine Trainingsdaten für diese Auswertung vorhanden.";
+        return;
+    }
+
+    // Der vorhandene CSS-Code enthält noch einen alten weißen Hintergrund.
+    // Farbvariablen sorgen schon jetzt für eine lesbare Dark-Mode-Darstellung.
+    chartContainer.style.backgroundColor = "var(--color-surface)";
+    chartContainer.style.borderColor = "var(--color-border)";
+
+    const unit = activeStatistic === "reps" ? "Wdh." : "kg";
+    const width = Math.max(650, 130 + data.length * 75);
+    const height = 350;
+    const left = 72;
+    const right = 34;
+    const top = 40;
+    const bottom = 65;
+    const plotWidth = width - left - right;
+    const plotHeight = height - top - bottom;
+
+    const values = data.map(item => item.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+
+    let lowerBound;
+    let upperBound;
+
+    if (activeStatistic === "reps") {
+        // Mindestens vier Einheiten Höhe für unterscheidbare ganzzahlige Achsen.
+        lowerBound = Math.max(0, Math.floor(minValue - 1));
+        upperBound = Math.max(Math.ceil(maxValue + 1), lowerBound + 4);
+    } else {
+        const padding = Math.max(2, (maxValue - minValue) * 0.15);
+        lowerBound = Math.max(0, minValue - padding);
+        upperBound = maxValue + padding;
+    }
+
+    const range = upperBound - lowerBound;
+    const getY = value => top + (upperBound - value) / range * plotHeight;
+
+    const svg = createSVGElement("svg", {
+        viewBox: `0 0 ${width} ${height}`,
+        role: "img",
+        "aria-label": `${chartTitle.textContent}: ${data.length} Messwerte im zeitlichen Verlauf`
+    });
+
+    // Auf kleinen Displays bleibt die Schrift lesbar: horizontal scrollen.
+    svg.style.display = "block";
+    svg.style.width = "100%";
+    svg.style.minWidth = `${width}px`;
+    svg.style.height = "auto";
+
+    svg.appendChild(createSVGElement("title", {}, chartTitle.textContent));
+    svg.appendChild(createSVGElement("desc", {}, chartDescription.textContent));
+
+    // Horizontale Hilfslinien und Y-Achse.
+    for (let i = 0; i <= 4; i++) {
+        const value = lowerBound + (range / 4) * i;
+        const y = getY(value);
+
+        svg.appendChild(createSVGElement("line", {
+            x1: left, y1: y, x2: width - right, y2: y,
+            stroke: "var(--color-border)", "stroke-width": 1
+        }));
+
+        const tick = activeStatistic === "reps"
+            ? String(Math.round(value))
+            : formatStatisticsValue(value);
+
+        svg.appendChild(createSVGElement("text", {
+            x: left - 12, y: y + 4,
+            "text-anchor": "end", "font-size": 12,
+            fill: "var(--color-text-secondary)"
+        }, `${tick} ${unit}`));
+    }
+
+    // Messpunkte chronologisch auf der X-Achse verteilen.
+    const points = data.map((item, index) => ({
+        ...item,
+        x: data.length === 1
+            ? left + plotWidth / 2
+            : left + index * plotWidth / (data.length - 1),
+        y: getY(item.value)
+    }));
+
+    svg.appendChild(createSVGElement("polyline", {
+        points: points.map(point => `${point.x},${point.y}`).join(" "),
+        fill: "none", stroke: "var(--color-primary)",
+        "stroke-width": 3, "stroke-linecap": "round",
+        "stroke-linejoin": "round"
+    }));
+
+    const dateLabelStep = Math.max(1, Math.ceil(data.length / 7));
+    const valueLabelStep = Math.max(1, Math.ceil(data.length / 10));
+
+    points.forEach((point, index) => {
+        const dateText = formatStatisticsDate(point.date);
+        let detail = `${dateText}: ${formatStatisticsValue(point.value)} ${unit}`;
+
+        if (activeStatistic === "reps") {
+            detail += ` bei ${formatStatisticsValue(point.actualWeight)} kg`;
+        }
+
+        const circle = createSVGElement("circle", {
+            cx: point.x, cy: point.y, r: 5,
+            fill: "var(--color-primary)", tabindex: 0,
+            "aria-label": detail
+        });
+        circle.appendChild(createSVGElement("title", {}, detail));
+        svg.appendChild(circle);
+
+        // Nicht alle Werte gleichzeitig beschriften, wenn es sehr viele gibt.
+        if (index % valueLabelStep === 0 || index === points.length - 1) {
+            svg.appendChild(createSVGElement("text", {
+                x: point.x, y: point.y - 13,
+                "text-anchor": "middle", "font-size": 12,
+                "font-weight": "bold", fill: "var(--color-primary)"
+            }, `${formatStatisticsValue(point.value)} ${unit}`));
+        }
+
+        if (index % dateLabelStep === 0 || index === points.length - 1) {
+            svg.appendChild(createSVGElement("text", {
+                x: point.x, y: height - bottom + 27,
+                "text-anchor": "middle", "font-size": 11,
+                fill: "var(--color-text-secondary)"
+            }, new Date(point.date).toLocaleDateString("de-DE", {
+                day: "2-digit", month: "2-digit"
+            })));
+        }
+    });
+
+    chartContainer.appendChild(svg);
+
+    // Werte zusätzlich als Liste: hilfreich auf iPhone und für Screenreader.
+    const details = document.createElement("details");
+    details.style.marginTop = "16px";
+    details.style.color = "var(--color-text)";
+
+    const summary = document.createElement("summary");
+    summary.textContent = `Alle Messwerte anzeigen (${data.length})`;
+    summary.style.cursor = "pointer";
+    details.appendChild(summary);
+
+    const list = document.createElement("ul");
+    list.style.paddingLeft = "20px";
+
+    for (const item of data) {
+        const entry = document.createElement("li");
+        entry.textContent = `${formatStatisticsDate(item.date)}: ` +
+            `${formatStatisticsValue(item.value)} ${unit}` +
+            (activeStatistic === "reps"
+                ? ` bei ${formatStatisticsValue(item.actualWeight)} kg`
+                : "");
+        list.appendChild(entry);
+    }
+
+    details.appendChild(list);
+    chartContainer.appendChild(details);
+}
+
+// ==========================================
+// STATISTIK AKTUALISIEREN
 // ==========================================
 
 function updateStatistics() {
-
-    const exerciseName = exerciseSelect.value;
-
-    // Bisheriges Diagramm und Meldungen entfernen
     chartContainer.replaceChildren();
     statisticsStatus.textContent = "";
 
-    setSelection.hidden =
-    activeStatistic !== "set" && activeStatistic !== "reps";
+    const exerciseName = exerciseSelect.value;
+    const needsSet = activeStatistic === "set" || activeStatistic === "reps";
+    setSelection.hidden = !needsSet;
 
-    // Ohne Übung keine Auswertung möglich
+    // Beschreibung passend zum ausgewählten Reiter setzen.
+    const descriptions = {
+        max: ["Maximales Gewicht",
+            "Das höchste verwendete Gewicht pro Trainingseinheit – unabhängig von der Wiederholungszahl."],
+        set: ["Satzgewicht",
+            "Vergleich des Gewichts derselben Satzposition über mehrere Trainingseinheiten."],
+        reps: ["Wiederholungen",
+            "Wiederholungen derselben Satzposition. Das verwendete Gewicht kann unterschiedlich sein."],
+        volume: ["Trainingsvolumen",
+            "Summe aus Gewicht × Wiederholungen über alle Sätze der ausgewählten Übung pro Trainingseinheit."]
+    };
+
+    const description = descriptions[activeStatistic] || descriptions.max;
+    chartTitle.textContent = description[0];
+    chartDescription.textContent = description[1];
+
     if (!exerciseName) {
-        statisticsStatus.textContent =
-            "Bitte wähle zuerst eine Übung aus.";
+        statisticsStatus.textContent = "Bitte wähle zuerst eine Übung aus.";
         return;
     }
 
     try {
+        const workouts = getPersonWorkouts();
+        let setNumber = 1;
 
-        let data = [];
+        if (needsSet) {
+            const availableSets = updateSetSelection(exerciseName, workouts);
 
-        // ======================================
-        // REITER: MAXIMALES GEWICHT
-        // ======================================
+            if (availableSets === 0) {
+                statisticsStatus.textContent = "Für diese Übung wurden keine Sätze gefunden.";
+                return;
+            }
 
-        if (activeStatistic === "max") {
-
-            chartTitle.textContent = "Maximales Gewicht";
-
-            chartDescription.textContent =
-                "Pro Trainingseinheit wird das höchste verwendete " +
-                "Gewicht angezeigt – unabhängig von der Wiederholungszahl.";
-
-            data = getMaxWeightData(exerciseName);
+            setNumber = Number(setNumberSelect.value);
+            chartTitle.textContent = activeStatistic === "set"
+                ? `Gewichtsentwicklung – Satz ${setNumber}`
+                : `Wiederholungsentwicklung – Satz ${setNumber}`;
         }
 
-        // ======================================
-        // REITER: SATZGEWICHT
-        // ======================================
+        const data = calculateStatisticsData(
+            workouts, exerciseName, activeStatistic, setNumber
+        );
 
-        else if (activeStatistic === "set") {
-
-            // Verfügbare Sätze der ausgewählten Übung laden
-            updateSetSelection(exerciseName);
-
-            const setNumber = Number(setNumberSelect.value);
-
-            chartTitle.textContent =
-                `Gewichtsentwicklung – Satz ${setNumber}`;
-
-            chartDescription.textContent =
-                `Vergleich des Gewichts von Satz ${setNumber} ` +
-                "über mehrere Trainingseinheiten.";
-
-            data = getSetWeightData(exerciseName, setNumber);
-        }
-
-                
-        // ======================================
-        // REITER: WIEDERHOLUNGEN
-        // ======================================
-
-        else if (activeStatistic === "reps") {
-
-            // Verfügbare Sätze der gewählten Übung laden
-            updateSetSelection(exerciseName);
-
-            // Ausgewählte Satznummer auslesen
-            const setNumber = Number(setNumberSelect.value);
-
-            // Diagrammüberschrift festlegen
-            chartTitle.textContent =
-                `Wiederholungsentwicklung – Satz ${setNumber}`;
-
-            // Erklärung für die Auswertung
-            chartDescription.textContent =
-                `Angezeigt werden die Wiederholungen von Satz ${setNumber} ` +
-                "über mehrere Trainingseinheiten. " +
-                "Das verwendete Gewicht kann dabei unterschiedlich sein.";
-
-            // Daten für das Diagramm berechnen
-            data = getRepetitionData(exerciseName, setNumber);
-        }
-                
-        // ======================================
-        // REITER: TRAININGSVOLUMEN
-        // ======================================
-
-        else if (activeStatistic === "volume") {
-
-            // Überschrift des Diagramms
-            chartTitle.textContent = "Trainingsvolumen";
-
-            // Erklärung der Kennzahl
-            chartDescription.textContent =
-                "Pro Trainingseinheit wird die Summe aus Gewicht × " +
-                "Wiederholungen über alle Sätze der ausgewählten " +
-                "Übung angezeigt.";
-
-            // Trainingsvolumen berechnen
-            data = getVolumeData(exerciseName);
-        }
-
-
-        // ======================================
-        // WEITERE REITER
-        // ======================================
-
-        else {
-
-            chartTitle.textContent = "Weitere Statistik";
-            chartDescription.textContent = "";
-
-            statisticsStatus.textContent =
-                "Diese Auswertung ergänzen wir im nächsten Schritt.";
-
-            return;
-        }
-
-        // Vorhandene Diagrammfunktion wiederverwenden
         drawChart(data);
-
     } catch (error) {
-
         console.error("Statistikfehler:", error);
-
-        statisticsStatus.textContent =
-            "Statistik konnte nicht berechnet werden.";
+        statisticsStatus.textContent = "Statistik konnte nicht geladen werden.";
     }
 }
 
 // ==========================================
-// EVENTS: ÜBUNG UND REITER WECHSELN
+// EVENTS UND INITIALISIERUNG
 // ==========================================
 
-// Bei einer anderen Übung die Statistik neu berechnen
+statisticsPersonSelect.addEventListener("change", function() {
+    // Wichtig: Personenauswahl NICHT erneut aufbauen.
+    try {
+        loadStatisticsExercises();
+        updateStatistics();
+    } catch (error) {
+        console.error("Personenwechsel fehlgeschlagen:", error);
+        chartContainer.replaceChildren();
+        statisticsStatus.textContent = "Trainingsdaten konnten nicht geladen werden.";
+    }
+});
+
 exerciseSelect.addEventListener("change", updateStatistics);
+setNumberSelect.addEventListener("change", updateStatistics);
 
-// Alle Statistik-Reiter finden
-const tabs = document.querySelectorAll(".stat-tab");
-
-tabs.forEach(function(tab) {
-
+statTabs.forEach(tab => {
     tab.addEventListener("click", function() {
-
-        // Ausgewählte Statistik merken
         activeStatistic = tab.dataset.stat;
 
-        // Aktive Hervorhebung aktualisieren
-        tabs.forEach(item => {
-            item.classList.remove("active");
+        statTabs.forEach(item => {
+            const active = item === tab;
+            item.classList.toggle("active", active);
+            item.setAttribute("aria-pressed", String(active));
         });
 
-        tab.classList.add("active");
-
-        // Diagramm neu laden
         updateStatistics();
     });
 });
 
-
-// ==========================================
-// STATISTIKSEITE INITIALISIEREN
-// ==========================================
-
-loadStatisticsExercises();
-
-// Beim Öffnen zunächst einen Hinweis anzeigen
-updateStatistics();
-
-// ==========================================
-// EVENT: ANDEREN SATZ AUSWÄHLEN
-// ==========================================
-
-// Diagramm bei einer neuen Satznummer aktualisieren
-setNumberSelect.addEventListener("change", updateStatistics);
-
-// ==========================================
-// SCHRITT 18.6.1 – PERSONENAUSWAHL
-// ==========================================
-
-// Auswahlfeld für die Trainingsperson
-const statisticsPersonSelect =
-    document.getElementById("statistics-person");
-
-
-// Alle bisher gespeicherten Personen laden
-function loadStatisticsPersons() {
-
-    // Alte Auswahl entfernen
-    statisticsPersonSelect.replaceChildren();
-
-    // "Ich" ist immer verfügbar
-    const persons = new Set(["Ich"]);
-
-    let workouts;
-
-    try {
-        workouts = loadWorkouts();
-    } catch (error) {
-        console.error("Personen konnten nicht geladen werden:", error);
-        statisticsStatus.textContent =
-            "Personen konnten nicht geladen werden.";
-        return;
-    }
-
-    // Alle gemeinsamen Trainings durchsuchen
-    for (const workout of workouts) {
-
-        if (!Array.isArray(workout.participants)) {
-            continue;
-        }
-
-        // Namen aus gemeinsamen Trainings übernehmen
-        for (const participant of workout.participants) {
-
-            if (typeof participant.name === "string" &&
-                participant.name.trim() !== "") {
-
-                persons.add(participant.name.trim());
-            }
-        }
-    }
-
-    // Auswahlmöglichkeiten erstellen
-    for (const person of persons) {
-
-        const option = document.createElement("option");
-
-        option.value = person;
-        option.textContent = person;
-
-        statisticsPersonSelect.appendChild(option);
-    }
-}
-
-
-// Beim Öffnen alle Personen anzeigen
-loadStatisticsPersons();
-
-// ==========================================
-// BEIM PERSONENWECHSEL ÜBUNGEN AKTUALISIEREN
-// ==========================================
-
-statisticsPersonSelect.addEventListener("change", function() {
-
-    // Übungsliste für die neue Person laden
+try {
+    loadStatisticsPersons();
     loadStatisticsExercises();
 
-    // Altes Diagramm entfernen und Hinweis anzeigen
-    updateStatistics();
-});
+    statTabs.forEach(tab => {
+        tab.setAttribute("aria-pressed", String(tab.dataset.stat === activeStatistic));
+    });
 
+    updateStatistics();
+} catch (error) {
+    console.error("Statistik konnte nicht initialisiert werden:", error);
+    statisticsStatus.textContent = "Trainingsdaten konnten nicht geladen werden.";
+}

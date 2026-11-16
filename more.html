@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mehr – Gym Tracker</title>
+
+    <!-- Gemeinsames Design -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="more-page">
+
+    <main class="more-main">
+
+        <header class="more-header">
+            <h1>Mehr</h1>
+            <p>Weitere Funktionen und Einstellungen</p>
+        </header>
+
+        <!-- ======================================
+             WEITERE FUNKTIONEN
+             ====================================== -->
+
+        <section class="more-section">
+
+            <h2>Deine Funktionen</h2>
+
+            <div class="more-links">
+
+                <a href="calendar.html" class="more-link">
+                    <span>▦</span>
+                    <span>Trainingskalender</span>
+                    <span aria-hidden="true">→</span>
+                </a>
+
+                <a href="plan-create.html" class="more-link">
+                    <span>☷</span>
+                    <span>Trainingsplan erstellen</span>
+                    <span aria-hidden="true">→</span>
+                </a>
+
+                <a href="backup.html" class="more-link">
+                    <span>⇩</span>
+                    <span>Datensicherung</span>
+                    <span aria-hidden="true">→</span>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- ======================================
+             EINSTELLUNGEN
+             ====================================== -->
+
+        <section class="more-section">
+
+            <h2>Einstellungen</h2>
+
+            <div class="more-settings">
+
+                <!-- Bestehenden Theme-Umschalter verwenden -->
+                <button type="button" id="theme-toggle"
+                        aria-label="Farbschema wechseln">
+
+                    <span id="theme-icon" aria-hidden="true">🌙</span>
+                    <span id="theme-label">Dark Mode</span>
+
+                </button>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Gemeinsame Theme-Funktion laden -->
+    <script src="theme.js"></script>
+    <!-- Gemeinsame Navigation -->
+    <script src="navigation.js"></script>
+
+</body>
+</html>

@@ -130,3 +130,74 @@ function displayPlans() {
 // ==========================================
 
 displayPlans();
+
+
+// ==========================================
+// SCHRITT D1.6 – DASHBOARD-STATISTIKEN
+// ==========================================
+
+function updateDashboard() {
+
+    // HTML-Elemente für die Kennzahlen auswählen
+    const weeklyElement = document.getElementById("weekly-workouts");
+    const totalElement = document.getElementById("total-workouts");
+
+    // Gespeicherte Trainings laden
+    let workouts = [];
+
+    try {
+        workouts = loadWorkouts();
+    } catch (error) {
+        console.error("Dashboard konnte nicht geladen werden:", error);
+        weeklyElement.textContent = "–";
+        totalElement.textContent = "–";
+        return;
+    }
+
+    // ==========================================
+    // ALLE TRAININGS ZÄHLEN
+    // ==========================================
+
+    totalElement.textContent = workouts.length;
+
+    // ==========================================
+    // TRAININGS DIESER WOCHE ZÄHLEN
+    // ==========================================
+
+    const today = new Date();
+
+    // Heutiges Datum auf Mitternacht setzen
+    const startOfWeek = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+    );
+
+    // Montag als ersten Wochentag verwenden
+    const weekday = (startOfWeek.getDay() + 6) % 7;
+
+    // Zum Montag der aktuellen Woche zurückgehen
+    startOfWeek.setDate(startOfWeek.getDate() - weekday);
+
+    // Beginn der nächsten Woche bestimmen
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+    // Alle Trainings dieser Woche zählen
+    const weeklyWorkouts = workouts.filter(function(workout) {
+
+        const date = new Date(workout.date);
+
+        return (
+            !Number.isNaN(date.getTime()) &&
+            date >= startOfWeek &&
+            date < endOfWeek
+        );
+    });
+
+    weeklyElement.textContent = weeklyWorkouts.length;
+}
+
+
+// Dashboard beim Öffnen der Startseite aktualisieren
+updateDashboard();
